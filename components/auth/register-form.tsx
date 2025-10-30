@@ -112,7 +112,7 @@ export function RegisterForm(props: React.HTMLAttributes<HTMLDivElement>) {
               autoComplete="new-password"
               disabled={isLoading}
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
           <div className="grid gap-1">
@@ -124,7 +124,7 @@ export function RegisterForm(props: React.HTMLAttributes<HTMLDivElement>) {
               autoComplete="new-password"
               disabled={isLoading}
               required
-              minLength={6}
+              minLength={8}
             />
           </div>
           <Button disabled={isLoading}>
