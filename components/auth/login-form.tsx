@@ -65,8 +65,6 @@ export function LoginForm(props: React.HTMLAttributes<HTMLDivElement>) {
               autoCorrect="off"
               disabled={isLoading}
               required
-              minLength={3}
-              maxLength={20}
             />
           </div>
           <div className="grid gap-1">
@@ -78,7 +76,6 @@ export function LoginForm(props: React.HTMLAttributes<HTMLDivElement>) {
               autoComplete="current-password"
               disabled={isLoading}
               required
-              minLength={8}
             />
           </div>
           <Button disabled={isLoading}>
