@@ -21,6 +21,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
@@ -187,6 +193,31 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
         : "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20"
     }`
   }
+
+  const getEndpointCountDisplay = (group: EndpointGroupWithEndpoints) => {
+    const totalCount = group.endpoints.length
+    const activeCount = group.endpoints.filter(e => e.status === "active").length
+    const inactiveCount = totalCount - activeCount
+
+    if (inactiveCount === 0) {
+      return <span>{totalCount}</span>
+    }
+
+    return (
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="cursor-help">
+              {activeCount} / {totalCount}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{inactiveCount} 个接口已禁用</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
   
   return (
     <div className="space-y-4">
@@ -231,7 +262,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                     {group.id}
                   </TableCell>
                   <TableCell className="font-medium">{group.name}</TableCell>
-                  <TableCell>{group.endpoints.length}</TableCell>
+                  <TableCell>{getEndpointCountDisplay(group)}</TableCell>
                   <TableCell>
                     <span className={getStatusBadgeClass(group.status)}>
                       {group.status === "active" ? "启用" : "禁用"}
