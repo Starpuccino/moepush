@@ -54,6 +54,7 @@ export function TestPushDialog({
         description: "JSON 格式化成功",
       })
     } catch (error) {
+      console.error("Error formatting JSON:", error)
       toast({
         variant: "destructive",
         description: "无法格式化：内容不是有效的 JSON 格式",
@@ -76,6 +77,7 @@ export function TestPushDialog({
       testData = JSON.parse(testContent)
     } catch (error) {
       // 不是有效的 JSON，将其作为纯文本字符串使用
+      console.error("Error parsing JSON:", error)
       testData = testContent.trim()
     }
 
@@ -83,7 +85,7 @@ export function TestPushDialog({
       await onTest(testData)
       onOpenChange(false)
     } catch (error) {
-      // 错误处理由调用方负责
+      console.error("Error during test push:", error)
     }
   }
 
