@@ -53,8 +53,8 @@ export async function toggleEndpointStatus(id: string) {
   return res.json() as Promise<Endpoint>
 }
 
-export async function testEndpoint(id: string, rule: string) {
-  const exampleBody = generateExampleBody(rule)
+export async function testEndpoint(id: string, rule: string, customData?: any) {
+  const exampleBody = customData || generateExampleBody(rule)
   const res = await fetch(`/api/push/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

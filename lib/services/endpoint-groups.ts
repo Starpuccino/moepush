@@ -1,5 +1,5 @@
 import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
-import { generateExampleBody } from "@/lib/utils"
+import { generateExampleBody } from "@/lib/generator"
 
 const API_URL = '/api/endpoint-groups'
 
@@ -119,10 +119,10 @@ export async function toggleEndpointGroupStatus(id: string): Promise<EndpointGro
   }
 }
 
-export async function testEndpointGroup(group: EndpointGroupWithEndpoints): Promise<any> {
+export async function testEndpointGroup(group: EndpointGroupWithEndpoints, customData?: any): Promise<any> {
   // 使用所有接口中的规则生成测试数据
   const allRules = group.endpoints.flatMap(e => e.rule ? [e.rule] : [])
-  const exampleBody = generateExampleBody(allRules.length > 0 ? allRules.join('\n') : '{}')
+  const exampleBody = customData || generateExampleBody(allRules.length > 0 ? allRules.join('\n') : '{}')
 
   const response = await fetch(`/api/push-group/${group.id}`, {
     method: 'POST',

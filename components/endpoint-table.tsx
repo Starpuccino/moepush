@@ -43,8 +43,10 @@ import { Channel } from "@/lib/channels"
 import { EndpointExample } from "@/components/endpoint-example"
 import { useRouter } from "next/navigation"
 import { deleteEndpoint, toggleEndpointStatus, testEndpoint, copyEndpoint } from "@/lib/services/endpoints"
+import { generateExampleBody } from "@/lib/generator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
+import { TestPushDialog } from "./test-push-dialog"
 
 interface EndpointTableProps {
   endpoints: Endpoint[]
@@ -75,6 +77,9 @@ export function EndpointTable({
   const [selectedEndpoints, setSelectedEndpoints] = useState<Endpoint[]>([])
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState<string | null>(null)
+  const [testDialogOpen, setTestDialogOpen] = useState(false)
+  const [endpointToTest, setEndpointToTest] = useState<Endpoint | null>(null)
+  const [testInitialContent, setTestInitialContent] = useState("")
 
   const filteredEndpoints = endpoints?.filter((endpoint) => {
     if (!searchQuery.trim()) return true
@@ -155,12 +160,15 @@ export function EndpointTable({
     }
   }
 
-  async function handleTest(endpoint: Endpoint) {
-    setIsTesting(endpoint.id)
+  async function handleTest(testData: any) {
+    if (!endpointToTest) return
+
+    setIsTesting(endpointToTest.id)
     try {
       await testEndpoint(
-        endpoint.id,
-        endpoint.rule,
+        endpointToTest.id,
+        endpointToTest.rule,
+        testData
       )
       toast({
         title: "测试成功",
@@ -173,6 +181,7 @@ export function EndpointTable({
         description: error instanceof Error ? error.message : "请检查配置是否正确",
         variant: "destructive",
       })
+      throw error // 重新抛出错误，让 TestPushDialog 知道测试失败了
     } finally {
       setIsTesting(null)
     }
@@ -304,14 +313,21 @@ export function EndpointTable({
                             查看示例
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleTest(endpoint)}
-                            disabled={isTesting === endpoint.id || endpoint.status !== 'active'}
+                            onClick={() => {
+                              setEndpointToTest(endpoint)
+                              const exampleBody = generateExampleBody(endpoint.rule)
+                              // 如果生成的示例体为空对象或只有默认消息，且规则包含 ${body}，则使用纯文本
+                              const ruleHasBodyOnly = endpoint.rule.includes('${body}') && !endpoint.rule.includes('${body.')
+                              if (ruleHasBodyOnly && Object.keys(exampleBody).length <= 1) {
+                                setTestInitialContent("示例消息内容")
+                              } else {
+                                setTestInitialContent(JSON.stringify(exampleBody, null, 4))
+                              }
+                              setTestDialogOpen(true)
+                            }}
+                            disabled={endpoint.status !== 'active'}
                           >
-                            {isTesting === endpoint.id ? (
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            ) : (
-                              <Zap className="mr-2 h-4 w-4" />
-                            )}
+                            <Zap className="mr-2 h-4 w-4" />
                             测试推送
                           </DropdownMenuItem>
                           <EndpointDialog 
@@ -426,6 +442,22 @@ export function EndpointTable({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TestPushDialog
+        open={testDialogOpen}
+        onOpenChange={setTestDialogOpen}
+        title="测试推送"
+        description={
+          <>
+            接口: {endpointToTest?.name}
+            <br />
+            您可以修改下方的测试内容，支持 JSON 对象或纯文本格式。
+          </>
+        }
+        initialContent={testInitialContent}
+        isTesting={isTesting === endpointToTest?.id}
+        onTest={handleTest}
+      />
 
       <EndpointExample
         endpoint={viewExample}
