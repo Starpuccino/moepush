@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Loader2, Trash, Eye, Power, Send, Pencil } from "lucide-react"
+import { Loader2, Trash, Eye, Power, Send, Pencil, Copy } from "lucide-react"
 
 import {
   Table,
@@ -21,11 +21,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useToast } from "@/components/ui/use-toast"
 import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
-import { deleteEndpointGroup, toggleEndpointGroupStatus, testEndpointGroup } from "@/lib/services/endpoint-groups"
+import { deleteEndpointGroup, toggleEndpointGroupStatus, testEndpointGroup, copyEndpointGroup } from "@/lib/services/endpoint-groups"
 import { formatDate } from "@/lib/utils"
 import { EndpointGroupExample } from "./endpoint-group-example"
 import {
@@ -52,6 +54,11 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
   const [viewExample, setViewExample] = useState<EndpointGroupWithEndpoints | null>(null)
   const [isLoading, setIsLoading] = useState<string | null>(null)
   const [isTesting, setIsTesting] = useState<string | null>(null)
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
+  const [groupToCopy, setGroupToCopy] = useState<EndpointGroupWithEndpoints | null>(null)
+  const [isCopying, setIsCopying] = useState(false)
+  const [copyName, setCopyName] = useState("")
+  const [copyStatus, setCopyStatus] = useState<"active" | "inactive">("inactive")
   const { toast } = useToast()
   
   const filteredGroups = groups.filter((group) => {
@@ -103,6 +110,28 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
       })
     } finally {
       setIsLoading(null)
+    }
+  }
+  
+  const handleCopy = async () => {
+    if (!groupToCopy || !copyName.trim()) return
+    
+    try {
+      setIsCopying(true)
+      await copyEndpointGroup(groupToCopy.id, copyName, copyStatus)
+      onGroupsUpdate()
+      toast({ description: "接口组已复制" })
+      setCopyDialogOpen(false)
+      setCopyName("")
+      setCopyStatus("inactive")
+    } catch (error) {
+      console.error('Error copying endpoint group:', error)
+      toast({ 
+        variant: "destructive",
+        description: error instanceof Error ? error.message : "复制失败，请重试" 
+      })
+    } finally {
+      setIsCopying(false)
     }
   }
   
@@ -231,6 +260,17 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                           onSuccess={onGroupsUpdate}
                           icon={<Pencil className="h-4 w-4 mr-2" />}
                         />
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setGroupToCopy(group)
+                            setCopyName(`${group.name}-副本`)
+                            setCopyStatus(group.status)
+                            setCopyDialogOpen(true)
+                          }}
+                        >
+                          <Copy className="mr-2 h-4 w-4" />
+                          复制
+                        </DropdownMenuItem>
                         <DropdownMenuItem 
                           onClick={() => handleToggleStatus(group.id)}
                           disabled={isLoading === group.id}
@@ -267,7 +307,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
           <AlertDialogHeader>
             <AlertDialogTitle>确认删除</AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除接口组 {groupToDelete?.name} 吗？此操作不会删除组内的接口，但无法撤销。
+              确定要删除接口组 {groupToDelete?.name} 吗？此操作不会删除组内的接口,但无法撤销。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -278,6 +318,52 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               确认
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>复制接口组</AlertDialogTitle>
+            <AlertDialogDescription>
+              复制接口组: {groupToCopy?.name}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="copy-group-name">
+                新接口组名称 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="copy-group-name"
+                placeholder="请输入新名称"
+                value={copyName}
+                onChange={(e) => setCopyName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="copy-group-status">
+                是否启用 <span className="text-red-500">*</span>
+              </Label>
+              <div>
+                <Switch
+                  id="copy-group-status"
+                  checked={copyStatus === "active"}
+                  onCheckedChange={(checked) => setCopyStatus(checked ? "active" : "inactive")}
+                />
+              </div>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isCopying || !copyName.trim()}
+              onClick={handleCopy}
+            >
+              {isCopying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              确认复制
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
