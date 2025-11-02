@@ -76,4 +76,19 @@ export async function getEndpoints() {
     throw new Error(error.error || '获取接口失败')
   }
   return response.json()
+}
+
+export async function copyEndpoint(id: string, name: string, status: "active" | "inactive" = "inactive") {
+  const res = await fetch(`${API_URL}/${id}/copy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, status }),
+  })
+
+  if (!res.ok) {
+    const error = await res.json() as { error?: string }
+    throw new Error(error.error || "复制失败")
+  }
+
+  return res.json() as Promise<Endpoint>
 }   

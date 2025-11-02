@@ -16,7 +16,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, Eye, Power, Trash, Pencil, Zap, Plus } from "lucide-react"
+import { MoreHorizontal, Loader2, Eye, Power, Trash, Pencil, Zap, Plus, Copy } from "lucide-react"
 import {
   Popover,
   PopoverContent,
@@ -36,11 +36,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/constants/endpoints"
 import { Channel } from "@/lib/channels"
 import { EndpointExample } from "@/components/endpoint-example"
 import { useRouter } from "next/navigation"
-import { deleteEndpoint, toggleEndpointStatus, testEndpoint } from "@/lib/services/endpoints"
+import { deleteEndpoint, toggleEndpointStatus, testEndpoint, copyEndpoint } from "@/lib/services/endpoints"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
 
@@ -62,6 +64,11 @@ export function EndpointTable({
   const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isTesting, setIsTesting] = useState<string | null>(null)
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
+  const [endpointToCopy, setEndpointToCopy] = useState<Endpoint | null>(null)
+  const [isCopying, setIsCopying] = useState(false)
+  const [copyName, setCopyName] = useState("")
+  const [copyStatus, setCopyStatus] = useState<"active" | "inactive">("inactive")
   const { toast } = useToast()
   const [viewExample, setViewExample] = useState<Endpoint | null>(null)
   const router = useRouter()
@@ -122,6 +129,29 @@ export function EndpointTable({
       })
     } finally {
       setIsLoading(null)
+    }
+  }
+
+  const handleCopy = async () => {
+    if (!endpointToCopy || !copyName.trim()) return
+    
+    try {
+      setIsCopying(true)
+      await copyEndpoint(endpointToCopy.id, copyName, copyStatus)
+      onEndpointsUpdate()
+      toast({ description: "接口已复制" })
+      setCopyDialogOpen(false)
+      setCopyName("")
+      setCopyStatus("inactive")
+      router.refresh()
+    } catch (error) {
+      console.error('Error copying endpoint:', error)
+      toast({ 
+        variant: "destructive",
+        description: error instanceof Error ? error.message : "复制失败，请重试" 
+      })
+    } finally {
+      setIsCopying(false)
     }
   }
 
@@ -292,6 +322,17 @@ export function EndpointTable({
                             icon={<Pencil className="h-4 w-4 mr-2" />}
                           />
                           <DropdownMenuItem
+                            onClick={() => {
+                              setEndpointToCopy(endpoint)
+                              setCopyName(`${endpoint.name}-副本`)
+                              setCopyStatus(endpoint.status)
+                              setCopyDialogOpen(true)
+                            }}
+                          >
+                            <Copy className="h-4 w-4 mr-2" />
+                            复制
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
                             disabled={isLoading === endpoint.id}
                             onClick={() => handleToggleStatus(endpoint.id)}
                           >
@@ -335,6 +376,52 @@ export function EndpointTable({
             >
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               确认
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>复制接口</AlertDialogTitle>
+            <AlertDialogDescription>
+              复制接口: {endpointToCopy?.name}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="copy-name">
+                新接口名称 <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="copy-name"
+                placeholder="请输入新名称"
+                value={copyName}
+                onChange={(e) => setCopyName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="copy-status">
+                是否启用 <span className="text-red-500">*</span>
+              </Label>
+              <div>
+                <Switch
+                  id="copy-status"
+                  checked={copyStatus === "active"}
+                  onCheckedChange={(checked) => setCopyStatus(checked ? "active" : "inactive")}
+                />
+              </div>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogAction
+              disabled={isCopying || !copyName.trim()}
+              onClick={handleCopy}
+            >
+              {isCopying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              确认复制
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

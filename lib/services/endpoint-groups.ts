@@ -138,4 +138,21 @@ export async function testEndpointGroup(group: EndpointGroupWithEndpoints): Prom
   }
 
   return response.json()
+}
+
+export async function copyEndpointGroup(id: string, name: string, status: "active" | "inactive" = "inactive"): Promise<{ id: string }> {
+  const response = await fetch(`${API_URL}/${id}/copy`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ name, status }),
+  })
+
+  if (!response.ok) {
+    const error = await response.json() as { error: string }
+    throw new Error(error.error || '复制接口组失败')
+  }
+
+  return response.json() as Promise<{ id: string }>
 } 
