@@ -29,6 +29,7 @@ import { useToast } from "@/components/ui/use-toast"
 import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
 import { deleteEndpointGroup, toggleEndpointGroupStatus, testEndpointGroup, copyEndpointGroup } from "@/lib/services/endpoint-groups"
 import { formatDate } from "@/lib/utils"
+import { generateExampleBody } from "@/lib/generator"
 import { EndpointGroupExample } from "./endpoint-group-example"
 import {
   DropdownMenu,
@@ -39,6 +40,7 @@ import {
 import { MoreHorizontal } from "lucide-react"
 import { EndpointGroupDialog } from "./endpoint-group-dialog"
 import { Endpoint } from "@/lib/db/schema/endpoints"
+import { TestPushDialog } from "./test-push-dialog"
 
 interface EndpointGroupTableProps {
   groups: EndpointGroupWithEndpoints[]
@@ -59,6 +61,9 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
   const [isCopying, setIsCopying] = useState(false)
   const [copyName, setCopyName] = useState("")
   const [copyStatus, setCopyStatus] = useState<"active" | "inactive">("inactive")
+  const [testDialogOpen, setTestDialogOpen] = useState(false)
+  const [groupToTest, setGroupToTest] = useState<EndpointGroupWithEndpoints | null>(null)
+  const [testInitialContent, setTestInitialContent] = useState("")
   const { toast } = useToast()
   
   const filteredGroups = groups.filter((group) => {
@@ -135,28 +140,30 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
     }
   }
   
-  const handleTest = async (group: EndpointGroupWithEndpoints) => {
-    if (group.endpoints.length === 0) {
+  const handleTest = async (testData: any) => {
+    if (!groupToTest) return
+
+    if (groupToTest.endpoints.length === 0) {
       toast({
         variant: "destructive",
         description: "接口组内没有接口，无法测试"
       })
-      return
+      throw new Error("接口组内没有接口")
     }
 
     // 检查是否所有接口都有规则
-    const hasInvalidRule = group.endpoints.some(e => !e.rule)
+    const hasInvalidRule = groupToTest.endpoints.some(e => !e.rule)
     if (hasInvalidRule) {
       toast({
         variant: "destructive",
         description: "接口组中存在未配置规则的接口"
       })
-      return
+      throw new Error("接口组中存在未配置规则的接口")
     }
 
-    setIsTesting(group.id)
+    setIsTesting(groupToTest.id)
     try {
-      const result = await testEndpointGroup(group)
+      const result = await testEndpointGroup(groupToTest, testData)
       toast({
         title: "测试结果",
         description: `成功: ${result.successCount}, 失败: ${result.failedCount}`,
@@ -167,6 +174,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
         variant: "destructive",
         description: error instanceof Error ? error.message : "测试失败"
       })
+      throw error
     } finally {
       setIsTesting(null)
     }
@@ -243,14 +251,23 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                           查看示例
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                          onClick={() => handleTest(group)}
-                          disabled={isTesting === group.id || group.status === "inactive"}
+                          onClick={() => {
+                            setGroupToTest(group)
+                            const allRules = group.endpoints.flatMap(e => e.rule ? [e.rule] : [])
+                            const combinedRule = allRules.join('\n')
+                            const exampleBody = generateExampleBody(allRules.length > 0 ? combinedRule : '{}')
+                            // 如果任一规则包含 ${body}（不带点号），且生成的示例体为空或只有默认消息，则使用纯文本
+                            const hasBodyOnly = allRules.some(rule => rule.includes('${body}') && !rule.includes('${body.'))
+                            if (hasBodyOnly && Object.keys(exampleBody).length <= 1) {
+                              setTestInitialContent("示例消息内容")
+                            } else {
+                              setTestInitialContent(JSON.stringify(exampleBody, null, 4))
+                            }
+                            setTestDialogOpen(true)
+                          }}
+                          disabled={group.status === "inactive"}
                         >
-                          {isTesting === group.id ? (
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          ) : (
-                            <Send className="mr-2 h-4 w-4" />
-                          )}
+                          <Send className="mr-2 h-4 w-4" />
                           测试推送
                         </DropdownMenuItem>
                         <EndpointGroupDialog 
@@ -368,6 +385,24 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TestPushDialog
+        open={testDialogOpen}
+        onOpenChange={setTestDialogOpen}
+        title="测试推送"
+        description={
+          <>
+            接口组: {groupToTest?.name}
+            <br />
+            包含 {groupToTest?.endpoints.length} 个接口
+            <br />
+            您可以修改下方的测试内容，支持 JSON 对象或纯文本格式。
+          </>
+        }
+        initialContent={testInitialContent}
+        isTesting={isTesting === groupToTest?.id}
+        onTest={handleTest}
+      />
       
       <EndpointGroupExample
         group={viewExample}
