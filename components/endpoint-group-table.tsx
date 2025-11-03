@@ -251,7 +251,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
             ) : (
               filteredGroups.map((group) => (
                 <TableRow key={group.id}>
-                  <TableCell className="font-mono text-xs">
+                  <TableCell className="font-mono">
                     {group.id}
                   </TableCell>
                   <TableCell className="font-medium">{group.name}</TableCell>
