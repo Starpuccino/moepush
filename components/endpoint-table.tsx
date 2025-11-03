@@ -47,6 +47,8 @@ import { generateExampleBody } from "@/lib/generator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
 import { TestPushDialog } from "./test-push-dialog"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { formatDate } from "@/lib/utils"
 
 interface EndpointTableProps {
   endpoints: Endpoint[]
@@ -187,10 +189,6 @@ export function EndpointTable({
     }
   }
 
-  const getStatusBadgeClass = (status: Endpoint["status"]) => {
-    return `inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${STATUS_COLORS[status]}`
-  }
-
   const toggleEndpointSelection = (endpoint: Endpoint) => {
     setSelectedEndpoints(prev => {
       const isSelected = prev.some(e => e.id === endpoint.id)
@@ -293,11 +291,9 @@ export function EndpointTable({
                       </Popover>
                     </TableCell>
                     <TableCell>
-                      <span className={getStatusBadgeClass(endpoint.status)}>
-                        {STATUS_LABELS[endpoint.status]}
-                      </span>
+                      <StatusBadge status={endpoint.status} label={STATUS_LABELS[endpoint.status]} />
                     </TableCell>
-                    <TableCell>{endpoint.createdAt}</TableCell>
+                    <TableCell>{formatDate(endpoint.createdAt)}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

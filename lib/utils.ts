@@ -1,6 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
 import { customAlphabet } from 'nanoid'
+import dayjs from 'dayjs'
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -51,14 +52,7 @@ export const generateId = customAlphabet(urlFriendlyAlphabet, 16)
 
 export function formatDate(date: Date | string) {
   if (!date) return "未知时间";
-  const d = typeof date === "string" ? new Date(date) : date;
-  return d.toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  });
+  return dayjs(date).format('YYYY-MM-DD HH:mm:ss');
 }
 
 export async function fetchWithTimeout(url: string, options: any = {}) {

@@ -47,6 +47,7 @@ import { MoreHorizontal } from "lucide-react"
 import { EndpointGroupDialog } from "./endpoint-group-dialog"
 import { Endpoint } from "@/lib/db/schema/endpoints"
 import { TestPushDialog } from "./test-push-dialog"
+import { StatusBadge } from "@/components/ui/status-badge"
 
 interface EndpointGroupTableProps {
   groups: EndpointGroupWithEndpoints[]
@@ -186,14 +187,6 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
     }
   }
   
-  const getStatusBadgeClass = (status: "active" | "inactive") => {
-    return `inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${
-      status === "active" 
-        ? "bg-green-50 text-green-700 ring-1 ring-inset ring-green-600/20"
-        : "bg-red-50 text-red-700 ring-1 ring-inset ring-red-600/20"
-    }`
-  }
-
   const getEndpointCountDisplay = (group: EndpointGroupWithEndpoints) => {
     const totalCount = group.endpoints.length
     const activeCount = group.endpoints.filter(e => e.status === "active").length
@@ -264,9 +257,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                   <TableCell className="font-medium">{group.name}</TableCell>
                   <TableCell>{getEndpointCountDisplay(group)}</TableCell>
                   <TableCell>
-                    <span className={getStatusBadgeClass(group.status)}>
-                      {group.status === "active" ? "启用" : "禁用"}
-                    </span>
+                    <StatusBadge status={group.status} label={group.status === "active" ? "启用" : "禁用"} />
                   </TableCell>
                   <TableCell>{formatDate(group.createdAt)}</TableCell>
                   <TableCell>
