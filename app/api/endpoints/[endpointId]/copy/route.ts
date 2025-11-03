@@ -5,12 +5,13 @@ import { and, eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
 import { generateId } from "@/lib/utils"
 import { z } from "zod"
+import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 export const runtime = "edge"
 
 const copyEndpointSchema = z.object({
   name: z.string().min(1, "名称不能为空"),
-  status: z.enum(["active", "inactive"]).optional(),
+  status: z.enum([ENDPOINT_STATUS.ACTIVE, ENDPOINT_STATUS.INACTIVE]).optional(),
 })
 
 export async function POST(
@@ -45,7 +46,7 @@ export async function POST(
       channelId: originalEndpoint.channelId,
       rule: originalEndpoint.rule,
       userId: session.user.id!,
-      status: status ?? "inactive",
+      status: status ?? ENDPOINT_STATUS.INACTIVE,
     })
 
     const created = await db.insert(endpoints).values(newEndpoint as any).returning()

@@ -3,6 +3,7 @@ import { getDb } from '@/lib/db'
 import { fetchWithTimeout } from '@/lib/utils'
 import { endpointGroups, endpointToGroup } from '@/lib/db/schema/endpoint-groups'
 import { eq } from 'drizzle-orm'
+import { ENDPOINT_STATUS } from '@/lib/constants/endpoints'
 
 export const runtime = 'edge'
 
@@ -27,7 +28,7 @@ export async function POST(
       )
     }
 
-    if (group.status === "inactive") {
+    if (group.status === ENDPOINT_STATUS.INACTIVE) {
       return NextResponse.json(
         { error: '接口组已禁用' },
         { status: 403 }

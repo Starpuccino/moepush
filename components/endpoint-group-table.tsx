@@ -48,6 +48,7 @@ import { EndpointGroupDialog } from "./endpoint-group-dialog"
 import { Endpoint } from "@/lib/db/schema/endpoints"
 import { TestPushDialog } from "./test-push-dialog"
 import { StatusBadge } from "@/components/ui/status-badge"
+import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 interface EndpointGroupTableProps {
   groups: EndpointGroupWithEndpoints[]
@@ -67,7 +68,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
   const [groupToCopy, setGroupToCopy] = useState<EndpointGroupWithEndpoints | null>(null)
   const [isCopying, setIsCopying] = useState(false)
   const [copyName, setCopyName] = useState("")
-  const [copyStatus, setCopyStatus] = useState<"active" | "inactive">("inactive")
+  const [copyStatus, setCopyStatus] = useState<typeof ENDPOINT_STATUS[keyof typeof ENDPOINT_STATUS]>(ENDPOINT_STATUS.INACTIVE)
   const [testDialogOpen, setTestDialogOpen] = useState(false)
   const [groupToTest, setGroupToTest] = useState<EndpointGroupWithEndpoints | null>(null)
   const [testInitialContent, setTestInitialContent] = useState("")
@@ -135,7 +136,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
       toast({ description: "接口组已复制" })
       setCopyDialogOpen(false)
       setCopyName("")
-      setCopyStatus("inactive")
+      setCopyStatus(ENDPOINT_STATUS.INACTIVE)
     } catch (error) {
       console.error('Error copying endpoint group:', error)
       toast({ 
@@ -257,7 +258,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                   <TableCell className="font-medium">{group.name}</TableCell>
                   <TableCell>{getEndpointCountDisplay(group)}</TableCell>
                   <TableCell>
-                    <StatusBadge status={group.status} label={group.status === "active" ? "启用" : "禁用"} />
+                    <StatusBadge status={group.status} />
                   </TableCell>
                   <TableCell>{formatDate(group.createdAt)}</TableCell>
                   <TableCell>
@@ -287,7 +288,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                             }
                             setTestDialogOpen(true)
                           }}
-                          disabled={group.status === "inactive"}
+                          disabled={group.status === ENDPOINT_STATUS.INACTIVE}
                         >
                           <Send className="mr-2 h-4 w-4" />
                           测试推送
@@ -389,8 +390,8 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
               <div>
                 <Switch
                   id="copy-group-status"
-                  checked={copyStatus === "active"}
-                  onCheckedChange={(checked) => setCopyStatus(checked ? "active" : "inactive")}
+                  checked={copyStatus === ENDPOINT_STATUS.ACTIVE}
+                  onCheckedChange={(checked) => setCopyStatus(checked ? ENDPOINT_STATUS.ACTIVE : ENDPOINT_STATUS.INACTIVE)}
                 />
               </div>
             </div>
