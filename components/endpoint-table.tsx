@@ -16,7 +16,7 @@ import {
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, Eye, Power, Trash, Pencil, Zap, Plus, Copy } from "lucide-react"
+import { MoreHorizontal, Loader2, Eye, Power, Trash, Pencil, Zap, Plus } from "lucide-react"
 import {
   Popover,
   PopoverContent,
@@ -36,17 +36,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
 import { STATUS_LABELS, STATUS_COLORS } from "@/lib/constants/endpoints"
 import { Channel } from "@/lib/channels"
 import { EndpointExample } from "@/components/endpoint-example"
 import { useRouter } from "next/navigation"
-import { deleteEndpoint, toggleEndpointStatus, testEndpoint, copyEndpoint } from "@/lib/services/endpoints"
-import { generateExampleBody } from "@/lib/generator"
+import { deleteEndpoint, toggleEndpointStatus, testEndpoint } from "@/lib/services/endpoints"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
-import { TestPushDialog } from "./test-push-dialog"
 
 interface EndpointTableProps {
   endpoints: Endpoint[]
@@ -66,20 +62,12 @@ export function EndpointTable({
   const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isTesting, setIsTesting] = useState<string | null>(null)
-  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
-  const [endpointToCopy, setEndpointToCopy] = useState<Endpoint | null>(null)
-  const [isCopying, setIsCopying] = useState(false)
-  const [copyName, setCopyName] = useState("")
-  const [copyStatus, setCopyStatus] = useState<"active" | "inactive">("inactive")
   const { toast } = useToast()
   const [viewExample, setViewExample] = useState<Endpoint | null>(null)
   const router = useRouter()
   const [selectedEndpoints, setSelectedEndpoints] = useState<Endpoint[]>([])
   const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false)
   const [isLoading, setIsLoading] = useState<string | null>(null)
-  const [testDialogOpen, setTestDialogOpen] = useState(false)
-  const [endpointToTest, setEndpointToTest] = useState<Endpoint | null>(null)
-  const [testInitialContent, setTestInitialContent] = useState("")
 
   const filteredEndpoints = endpoints?.filter((endpoint) => {
     if (!searchQuery.trim()) return true
@@ -137,38 +125,12 @@ export function EndpointTable({
     }
   }
 
-  const handleCopy = async () => {
-    if (!endpointToCopy || !copyName.trim()) return
-    
-    try {
-      setIsCopying(true)
-      await copyEndpoint(endpointToCopy.id, copyName, copyStatus)
-      onEndpointsUpdate()
-      toast({ description: "接口已复制" })
-      setCopyDialogOpen(false)
-      setCopyName("")
-      setCopyStatus("inactive")
-      router.refresh()
-    } catch (error) {
-      console.error('Error copying endpoint:', error)
-      toast({ 
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "复制失败，请重试" 
-      })
-    } finally {
-      setIsCopying(false)
-    }
-  }
-
-  async function handleTest(testData: any) {
-    if (!endpointToTest) return
-
-    setIsTesting(endpointToTest.id)
+  async function handleTest(endpoint: Endpoint) {
+    setIsTesting(endpoint.id)
     try {
       await testEndpoint(
-        endpointToTest.id,
-        endpointToTest.rule,
-        testData
+        endpoint.id,
+        endpoint.rule,
       )
       toast({
         title: "测试成功",
@@ -181,7 +143,6 @@ export function EndpointTable({
         description: error instanceof Error ? error.message : "请检查配置是否正确",
         variant: "destructive",
       })
-      throw error // 重新抛出错误，让 TestPushDialog 知道测试失败了
     } finally {
       setIsTesting(null)
     }
@@ -313,21 +274,14 @@ export function EndpointTable({
                             查看示例
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => {
-                              setEndpointToTest(endpoint)
-                              const exampleBody = generateExampleBody(endpoint.rule)
-                              // 如果生成的示例体为空对象或只有默认消息，且规则包含 ${body}，则使用纯文本
-                              const ruleHasBodyOnly = endpoint.rule.includes('${body}') && !endpoint.rule.includes('${body.')
-                              if (ruleHasBodyOnly && Object.keys(exampleBody).length <= 1) {
-                                setTestInitialContent("示例消息内容")
-                              } else {
-                                setTestInitialContent(JSON.stringify(exampleBody, null, 4))
-                              }
-                              setTestDialogOpen(true)
-                            }}
-                            disabled={endpoint.status !== 'active'}
+                            onClick={() => handleTest(endpoint)}
+                            disabled={isTesting === endpoint.id || endpoint.status !== 'active'}
                           >
-                            <Zap className="mr-2 h-4 w-4" />
+                            {isTesting === endpoint.id ? (
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            ) : (
+                              <Zap className="mr-2 h-4 w-4" />
+                            )}
                             测试推送
                           </DropdownMenuItem>
                           <EndpointDialog 
@@ -337,17 +291,6 @@ export function EndpointTable({
                             onSuccess={onEndpointsUpdate}
                             icon={<Pencil className="h-4 w-4 mr-2" />}
                           />
-                          <DropdownMenuItem
-                            onClick={() => {
-                              setEndpointToCopy(endpoint)
-                              setCopyName(`${endpoint.name}-副本`)
-                              setCopyStatus(endpoint.status)
-                              setCopyDialogOpen(true)
-                            }}
-                          >
-                            <Copy className="h-4 w-4 mr-2" />
-                            复制
-                          </DropdownMenuItem>
                           <DropdownMenuItem
                             disabled={isLoading === endpoint.id}
                             onClick={() => handleToggleStatus(endpoint.id)}
@@ -396,68 +339,6 @@ export function EndpointTable({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <AlertDialog open={copyDialogOpen} onOpenChange={setCopyDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>复制接口</AlertDialogTitle>
-            <AlertDialogDescription>
-              复制接口: {endpointToCopy?.name}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="copy-name">
-                新接口名称 <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="copy-name"
-                placeholder="请输入新名称"
-                value={copyName}
-                onChange={(e) => setCopyName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="copy-status">
-                是否启用 <span className="text-red-500">*</span>
-              </Label>
-              <div>
-                <Switch
-                  id="copy-status"
-                  checked={copyStatus === "active"}
-                  onCheckedChange={(checked) => setCopyStatus(checked ? "active" : "inactive")}
-                />
-              </div>
-            </div>
-          </div>
-          <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isCopying || !copyName.trim()}
-              onClick={handleCopy}
-            >
-              {isCopying && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              确认复制
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <TestPushDialog
-        open={testDialogOpen}
-        onOpenChange={setTestDialogOpen}
-        title="测试推送"
-        description={
-          <>
-            接口: {endpointToTest?.name}
-            <br />
-            您可以修改下方的测试内容，支持 JSON 对象或纯文本格式。
-          </>
-        }
-        initialContent={testInitialContent}
-        isTesting={isTesting === endpointToTest?.id}
-        onTest={handleTest}
-      />
 
       <EndpointExample
         endpoint={viewExample}

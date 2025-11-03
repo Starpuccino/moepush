@@ -10,7 +10,7 @@ import {
   DialogTitle 
 } from "@/components/ui/dialog"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { generateExampleBody } from "@/lib/generator"
+import { generateExampleBody } from "@/lib/utils"
 
 interface EndpointGroupExampleProps {
   group: EndpointGroupWithEndpoints | null

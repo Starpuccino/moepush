@@ -1,5 +1,5 @@
 import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
-import { generateExampleBody } from "@/lib/generator"
+import { generateExampleBody } from "@/lib/utils"
 
 const API_URL = '/api/endpoint-groups'
 
@@ -60,32 +60,6 @@ export async function createEndpointGroup(data: CreateEndpointGroupData): Promis
   return response.json() as Promise<{ id: string }>
 }
 
-export interface UpdateEndpointGroupData {
-  name: string
-  endpointIds: string[]
-}
-
-export async function updateEndpointGroup(id: string, data: UpdateEndpointGroupData): Promise<{ success: boolean }> {
-  if (!data.endpointIds.length) {
-    throw new Error('请至少选择一个接口')
-  }
-
-  const response = await fetch(`${API_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data),
-  })
-
-  if (!response.ok) {
-    const error = await response.json() as { error: string }
-    throw new Error(error.error || '更新接口组失败')
-  }
-
-  return response.json() as Promise<{ success: boolean }>
-}
-
 export async function deleteEndpointGroup(id: string): Promise<{ success: boolean }> {
   const response = await fetch(`${API_URL}/${id}`, {
     method: 'DELETE',
@@ -119,10 +93,10 @@ export async function toggleEndpointGroupStatus(id: string): Promise<EndpointGro
   }
 }
 
-export async function testEndpointGroup(group: EndpointGroupWithEndpoints, customData?: any): Promise<any> {
+export async function testEndpointGroup(group: EndpointGroupWithEndpoints): Promise<any> {
   // 使用所有接口中的规则生成测试数据
   const allRules = group.endpoints.flatMap(e => e.rule ? [e.rule] : [])
-  const exampleBody = customData || generateExampleBody(allRules.length > 0 ? allRules.join('\n') : '{}')
+  const exampleBody = generateExampleBody(allRules.length > 0 ? allRules.join('\n') : '{}')
 
   const response = await fetch(`/api/push-group/${group.id}`, {
     method: 'POST',
@@ -138,21 +112,4 @@ export async function testEndpointGroup(group: EndpointGroupWithEndpoints, custo
   }
 
   return response.json()
-}
-
-export async function copyEndpointGroup(id: string, name: string, status: "active" | "inactive" = "inactive"): Promise<{ id: string }> {
-  const response = await fetch(`${API_URL}/${id}/copy`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ name, status }),
-  })
-
-  if (!response.ok) {
-    const error = await response.json() as { error: string }
-    throw new Error(error.error || '复制接口组失败')
-  }
-
-  return response.json() as Promise<{ id: string }>
 } 
