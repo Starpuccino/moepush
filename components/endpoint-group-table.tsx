@@ -355,7 +355,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
           <AlertDialogHeader>
             <AlertDialogTitle>确认删除</AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除接口组 {groupToDelete?.name} 吗？此操作不会删除组内的接口,但无法撤销。
+              确定要删除接口组 {groupToDelete?.name} 吗？此操作不会删除组内的接口，但无法撤销。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
