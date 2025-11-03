@@ -53,8 +53,8 @@ export async function toggleEndpointStatus(id: string) {
   return res.json() as Promise<Endpoint>
 }
 
-export async function testEndpoint(id: string, rule: string) {
-  const exampleBody = generateExampleBody(rule)
+export async function testEndpoint(id: string, rule: string, customData?: any) {
+  const exampleBody = customData || generateExampleBody(rule)
   const res = await fetch(`/api/push/${id}`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -76,4 +76,19 @@ export async function getEndpoints() {
     throw new Error(error.error || '获取接口失败')
   }
   return response.json()
+}
+
+export async function copyEndpoint(id: string, name: string, status: "active" | "inactive" = "inactive") {
+  const res = await fetch(`${API_URL}/${id}/copy`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, status }),
+  })
+
+  if (!res.ok) {
+    const error = await res.json() as { error?: string }
+    throw new Error(error.error || "复制失败")
+  }
+
+  return res.json() as Promise<Endpoint>
 }   
