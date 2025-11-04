@@ -38,7 +38,6 @@ import {
 } from "@/components/ui/alert-dialog"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { STATUS_LABELS, STATUS_COLORS } from "@/lib/constants/endpoints"
 import { Channel } from "@/lib/channels"
 import { EndpointExample } from "@/components/endpoint-example"
 import { useRouter } from "next/navigation"
@@ -47,6 +46,9 @@ import { generateExampleBody } from "@/lib/generator"
 import { Checkbox } from "@/components/ui/checkbox"
 import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
 import { TestPushDialog } from "./test-push-dialog"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { formatDate } from "@/lib/utils"
+import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 interface EndpointTableProps {
   endpoints: Endpoint[]
@@ -70,7 +72,7 @@ export function EndpointTable({
   const [endpointToCopy, setEndpointToCopy] = useState<Endpoint | null>(null)
   const [isCopying, setIsCopying] = useState(false)
   const [copyName, setCopyName] = useState("")
-  const [copyStatus, setCopyStatus] = useState<"active" | "inactive">("inactive")
+  const [copyStatus, setCopyStatus] = useState<typeof ENDPOINT_STATUS[keyof typeof ENDPOINT_STATUS]>(ENDPOINT_STATUS.INACTIVE)
   const { toast } = useToast()
   const [viewExample, setViewExample] = useState<Endpoint | null>(null)
   const router = useRouter()
@@ -147,7 +149,7 @@ export function EndpointTable({
       toast({ description: "接口已复制" })
       setCopyDialogOpen(false)
       setCopyName("")
-      setCopyStatus("inactive")
+      setCopyStatus(ENDPOINT_STATUS.INACTIVE)
       router.refresh()
     } catch (error) {
       console.error('Error copying endpoint:', error)
@@ -185,10 +187,6 @@ export function EndpointTable({
     } finally {
       setIsTesting(null)
     }
-  }
-
-  const getStatusBadgeClass = (status: Endpoint["status"]) => {
-    return `inline-flex items-center rounded-full px-2 py-1 text-xs font-medium ${STATUS_COLORS[status]}`
   }
 
   const toggleEndpointSelection = (endpoint: Endpoint) => {
@@ -293,11 +291,9 @@ export function EndpointTable({
                       </Popover>
                     </TableCell>
                     <TableCell>
-                      <span className={getStatusBadgeClass(endpoint.status)}>
-                        {STATUS_LABELS[endpoint.status]}
-                      </span>
+                      <StatusBadge status={endpoint.status} />
                     </TableCell>
-                    <TableCell>{endpoint.createdAt}</TableCell>
+                    <TableCell>{formatDate(endpoint.createdAt)}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -325,7 +321,7 @@ export function EndpointTable({
                               }
                               setTestDialogOpen(true)
                             }}
-                            disabled={endpoint.status !== 'active'}
+                            disabled={endpoint.status !== ENDPOINT_STATUS.ACTIVE}
                           >
                             <Zap className="mr-2 h-4 w-4" />
                             测试推送
@@ -424,8 +420,8 @@ export function EndpointTable({
               <div>
                 <Switch
                   id="copy-status"
-                  checked={copyStatus === "active"}
-                  onCheckedChange={(checked) => setCopyStatus(checked ? "active" : "inactive")}
+                  checked={copyStatus === ENDPOINT_STATUS.ACTIVE}
+                  onCheckedChange={(checked) => setCopyStatus(checked ? ENDPOINT_STATUS.ACTIVE : ENDPOINT_STATUS.INACTIVE)}
                 />
               </div>
             </div>

@@ -21,6 +21,8 @@ import { useState, useEffect } from "react"
 import { ChannelDialog } from "@/components/channel-dialog"
 import { Channel, CHANNEL_LABELS } from "@/lib/channels"
 import { useToast } from "@/components/ui/use-toast"
+import { StatusBadge } from "@/components/ui/status-badge"
+import { formatDate } from "@/lib/utils"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -85,15 +87,7 @@ export function ChannelTable({ channels }: ChannelTableProps) {
     }
   }
 
-  const getStatusBadgeClass = (status: Channel["status"]) => {
-    return status === "active" 
-      ? "inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20"
-      : "inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-inset ring-red-600/20"
-  }
 
-  const getStatusText = (status: Channel["status"]) => {
-    return status === "active" ? "正常" : "禁用"
-  }
 
   const getChannelText = (type: Channel["type"]) => {
     return CHANNEL_LABELS[type]
@@ -139,11 +133,9 @@ export function ChannelTable({ channels }: ChannelTableProps) {
                   <TableCell>{channel.name}</TableCell>
                   <TableCell>{getChannelText(channel.type)}</TableCell>
                   <TableCell>
-                    <span className={getStatusBadgeClass(channel.status)}>
-                      {getStatusText(channel.status)}
-                    </span>
+                    <StatusBadge status={channel.status} />
                   </TableCell>
-                  <TableCell>{channel.createdAt}</TableCell>
+                  <TableCell>{formatDate(channel.createdAt)}</TableCell>
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>

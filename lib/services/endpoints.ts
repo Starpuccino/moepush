@@ -1,5 +1,6 @@
 import { Endpoint, NewEndpoint } from "@/lib/db/schema/endpoints"
 import { generateExampleBody } from "../generator"
+import { EndpointStatus, ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 const API_URL = "/api/endpoints"
 
@@ -78,7 +79,7 @@ export async function getEndpoints() {
   return response.json()
 }
 
-export async function copyEndpoint(id: string, name: string, status: "active" | "inactive" = "inactive") {
+export async function copyEndpoint(id: string, name: string, status: EndpointStatus = ENDPOINT_STATUS.INACTIVE) {
   const res = await fetch(`${API_URL}/${id}/copy`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

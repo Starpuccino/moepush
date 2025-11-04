@@ -5,12 +5,13 @@ import { endpointGroups, endpointToGroup } from "@/lib/db/schema/endpoint-groups
 import { eq, and } from "drizzle-orm"
 import { generateId } from "@/lib/utils"
 import { z } from "zod"
+import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 export const runtime = 'edge'
 
 const copyEndpointGroupSchema = z.object({
   name: z.string().min(1, "名称不能为空"),
-  status: z.enum(["active", "inactive"]).optional(),
+  status: z.enum([ENDPOINT_STATUS.ACTIVE, ENDPOINT_STATUS.INACTIVE]).optional(),
 })
 
 export async function POST(
@@ -50,7 +51,7 @@ export async function POST(
       id: newGroupId,
       name,
       userId: session!.user!.id!,
-      status: status ?? "inactive",
+      status: status ?? ENDPOINT_STATUS.INACTIVE,
       createdAt: new Date(),
       updatedAt: new Date(),
     })

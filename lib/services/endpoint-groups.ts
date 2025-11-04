@@ -1,5 +1,6 @@
 import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
 import { generateExampleBody } from "@/lib/generator"
+import { EndpointStatus, ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 const API_URL = '/api/endpoint-groups'
 
@@ -7,7 +8,7 @@ interface EndpointGroupResponse {
   id: string
   name: string
   userId: string
-  status: "active" | "inactive"
+  status: EndpointStatus
   createdAt: string
   updatedAt: string
   endpointIds: string[]
@@ -15,7 +16,7 @@ interface EndpointGroupResponse {
 }
 
 interface ToggleEndpointGroupResponse extends EndpointGroupResponse {
-  status: "active" | "inactive"
+  status: EndpointStatus
 }
 
 export async function getEndpointGroups(): Promise<EndpointGroupWithEndpoints[]> {
@@ -140,7 +141,7 @@ export async function testEndpointGroup(group: EndpointGroupWithEndpoints, custo
   return response.json()
 }
 
-export async function copyEndpointGroup(id: string, name: string, status: "active" | "inactive" = "inactive"): Promise<{ id: string }> {
+export async function copyEndpointGroup(id: string, name: string, status: EndpointStatus = ENDPOINT_STATUS.INACTIVE): Promise<{ id: string }> {
   const response = await fetch(`${API_URL}/${id}/copy`, {
     method: 'POST',
     headers: {

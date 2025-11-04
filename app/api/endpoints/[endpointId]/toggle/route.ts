@@ -3,6 +3,7 @@ import { getDb } from "@/lib/db"
 import { endpoints } from "@/lib/db/schema/endpoints"
 import { and, eq } from "drizzle-orm"
 import { NextResponse } from "next/server"
+import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 export const runtime = "edge"
 
@@ -32,7 +33,7 @@ export async function POST(
 
     const updated = await db.update(endpoints)
       .set({ 
-        status: endpoint.status === 'active' ? 'inactive' : 'active' 
+        status: endpoint.status === ENDPOINT_STATUS.ACTIVE ? ENDPOINT_STATUS.INACTIVE : ENDPOINT_STATUS.ACTIVE 
       })
       .where(eq(endpoints.id, endpointId))
       .returning()

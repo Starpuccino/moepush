@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth"
 import { getDb } from "@/lib/db"
 import { endpointGroups } from "@/lib/db/schema/endpoint-groups"
 import { eq, and } from "drizzle-orm"
+import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
 
 export const runtime = 'edge'
 
@@ -32,7 +33,7 @@ export async function POST(
     }
 
     // 切换状态
-    const newStatus = group.status === "active" ? "inactive" : "active"
+    const newStatus = group.status === ENDPOINT_STATUS.ACTIVE ? ENDPOINT_STATUS.INACTIVE : ENDPOINT_STATUS.ACTIVE
     
     // 更新状态
     await db
