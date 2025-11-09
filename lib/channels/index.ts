@@ -1,27 +1,27 @@
-import { BaseChannel } from "./base"
-import { Channel as DBInferChannel } from "@/lib/db/schema/channels"
-import { DingTalkChannel } from "./dingtalk"
-import { WecomChannel } from "./wecom"
-import { WecomAppChannel } from "./wecom-app"
-import { TelegramChannel } from "./telegram"
-import { FeishuChannel } from "./feishu"
-import { DiscordChannel } from "./discord"
-import { BarkChannel } from "./bark"
-import { WebhookChannel } from "./webhook"
+import { BaseChannel } from './base';
+import { Channel as DBInferChannel } from '@/lib/db/schema/channels';
+import { DingTalkChannel } from './dingtalk';
+import { WecomChannel } from './wecom';
+import { WecomAppChannel } from './wecom-app';
+import { TelegramChannel } from './telegram';
+import { FeishuChannel } from './feishu';
+import { DiscordChannel } from './discord';
+import { BarkChannel } from './bark';
+import { WebhookChannel } from './webhook';
 
 // 渠道类型常量
 export const CHANNEL_TYPES = {
-  DINGTALK: "dingtalk",
-  WECOM: "wecom",
-  WECOM_APP: "wecom_app",
-  TELEGRAM: "telegram",
-  FEISHU: "feishu",
-  DISCORD: "discord",
-  BARK: "bark",
-  WEBHOOK: "webhook",
-} as const
+  DINGTALK: 'dingtalk',
+  WECOM: 'wecom',
+  WECOM_APP: 'wecom_app',
+  TELEGRAM: 'telegram',
+  FEISHU: 'feishu',
+  DISCORD: 'discord',
+  BARK: 'bark',
+  WEBHOOK: 'webhook'
+} as const;
 
-export type ChannelType = typeof CHANNEL_TYPES[keyof typeof CHANNEL_TYPES]
+export type ChannelType = (typeof CHANNEL_TYPES)[keyof typeof CHANNEL_TYPES];
 
 // 注册所有渠道
 const channels: Record<ChannelType, BaseChannel> = {
@@ -32,41 +32,43 @@ const channels: Record<ChannelType, BaseChannel> = {
   [CHANNEL_TYPES.FEISHU]: new FeishuChannel(),
   [CHANNEL_TYPES.DISCORD]: new DiscordChannel(),
   [CHANNEL_TYPES.BARK]: new BarkChannel(),
-  [CHANNEL_TYPES.WEBHOOK]: new WebhookChannel(),
-}
+  [CHANNEL_TYPES.WEBHOOK]: new WebhookChannel()
+};
 
 // 获取所有渠道标签
-export const CHANNEL_LABELS: Record<ChannelType, string> = Object.entries(channels).reduce(
+export const CHANNEL_LABELS: Record<ChannelType, string> = Object.entries(
+  channels
+).reduce(
   (acc, [type, channel]) => ({
     ...acc,
-    [type]: channel.getLabel(),
+    [type]: channel.getLabel()
   }),
   {} as Record<ChannelType, string>
-)
+);
 
 // 获取所有渠道模板
 export const CHANNEL_TEMPLATES = Object.entries(channels).reduce(
   (acc, [type, channel]) => ({
     ...acc,
-    [type]: channel.getTemplates(),
+    [type]: channel.getTemplates()
   }),
   {} as Record<ChannelType, any[]>
-)
+);
 
 // 获取指定渠道
 export function getChannel(type: ChannelType): BaseChannel {
-  return channels[type]
+  return channels[type];
 }
 
 // 发送消息
 export async function sendChannelMessage(
-  type: ChannelType, 
-  message: any, 
+  type: ChannelType,
+  message: any,
   options: any
 ): Promise<Response> {
-  const channel = getChannel(type)
-  return channel.sendMessage(message, options)
+  const channel = getChannel(type);
+  return channel.sendMessage(message, options);
 }
 
 // 导出渠道接口
-export type Channel = DBInferChannel & { type: ChannelType }
+export type Channel = DBInferChannel & { type: ChannelType };

@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { Input } from "@/components/ui/input"
+import { Input } from '@/components/ui/input';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { UseFormReturn } from "react-hook-form"
-import type { ChannelFormData } from "@/lib/db/schema/channels"
+  FormMessage
+} from '@/components/ui/form';
+import { UseFormReturn } from 'react-hook-form';
+import type { ChannelFormData } from '@/lib/db/schema/channels';
 
 interface WecomFieldsProps {
-  form: UseFormReturn<ChannelFormData>
+  form: UseFormReturn<ChannelFormData>;
 }
 
 export function WecomFields({ form }: WecomFieldsProps) {
@@ -28,10 +28,10 @@ export function WecomFields({ form }: WecomFieldsProps) {
               <span className="text-red-500 ml-1">*</span>
             </FormLabel>
             <FormControl>
-              <Input 
-                placeholder="请输入 Webhook 地址" 
+              <Input
+                placeholder="请输入 Webhook 地址"
                 className="font-mono"
-                {...field} 
+                {...field}
               />
             </FormControl>
             <FormMessage />
@@ -39,5 +39,5 @@ export function WecomFields({ form }: WecomFieldsProps) {
         )}
       />
     </>
-  )
-} 
+  );
+}

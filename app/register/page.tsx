@@ -1,11 +1,11 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import { RegisterForm } from "@/components/auth/register-form";
-import { GitHubButton } from "@/components/auth/github-button";
+import { Metadata } from 'next';
+import Link from 'next/link';
+import { RegisterForm } from '@/components/auth/register-form';
+import { GitHubButton } from '@/components/auth/github-button';
 
 export const metadata: Metadata = {
-  title: "注册 - MoePush",
-  description: "创建新账号",
+  title: '注册 - MoePush',
+  description: '创建新账号'
 };
 
 export default function RegisterPage() {
@@ -22,18 +22,14 @@ export default function RegisterPage() {
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
-            <p className="text-lg">
-              简单易用的消息推送服务
-            </p>
+            <p className="text-lg">简单易用的消息推送服务</p>
           </blockquote>
         </div>
       </div>
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              创建账号
-            </h1>
+            <h1 className="text-2xl font-semibold tracking-tight">创建账号</h1>
           </div>
           <div className="grid gap-6">
             <div className="grid gap-2">
@@ -51,7 +47,7 @@ export default function RegisterPage() {
             </div>
             <GitHubButton />
             <p className="px-8 text-center text-sm text-muted-foreground">
-              已有账号?{" "}
+              已有账号?{' '}
               <Link
                 href="/login"
                 className="underline underline-offset-4 hover:text-primary"
@@ -64,4 +60,4 @@ export default function RegisterPage() {
       </div>
     </div>
   );
-} 
+}

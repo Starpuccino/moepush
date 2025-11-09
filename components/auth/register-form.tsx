@@ -1,13 +1,13 @@
-"use client";
+'use client';
 
-import * as React from "react";
-import { useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Icons } from "@/components/icons";
-import { useToast } from "@/components/ui/use-toast";
-import { signIn } from "next-auth/react";
+import * as React from 'react';
+import { useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Icons } from '@/components/icons';
+import { useToast } from '@/components/ui/use-toast';
+import { signIn } from 'next-auth/react';
 
 export function RegisterForm(props: React.HTMLAttributes<HTMLDivElement>) {
   const { toast } = useToast();
@@ -30,54 +30,54 @@ export function RegisterForm(props: React.HTMLAttributes<HTMLDivElement>) {
 
     if (password !== confirmPassword) {
       toast({
-        title: "错误",
-        description: "两次输入的密码不一致",
-        variant: "destructive",
+        title: '错误',
+        description: '两次输入的密码不一致',
+        variant: 'destructive'
       });
       setIsLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("/api/register", {
-        method: "POST",
+      const response = await fetch('/api/register', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({
           username,
-          password,
-        }),
+          password
+        })
       });
 
       if (!response.ok) {
-        const error = await response.json() as { message: string };
+        const error = (await response.json()) as { message: string };
         throw new Error(error.message);
       }
 
       // 注册成功后直接登录
-      const result = await signIn("credentials", {
+      const result = await signIn('credentials', {
         username,
         password,
-        redirect: false,
+        redirect: false
       });
 
       if (result?.error) {
-        throw new Error("登录失败");
+        throw new Error('登录失败');
       }
 
       toast({
-        title: "注册成功",
-        description: "正在跳转...",
+        title: '注册成功',
+        description: '正在跳转...'
       });
 
-      router.push("/moe/endpoints");
+      router.push('/moe/endpoints');
       router.refresh();
     } catch (error) {
       toast({
-        title: "注册失败",
-        description: error instanceof Error ? error.message : "请稍后重试",
-        variant: "destructive",
+        title: '注册失败',
+        description: error instanceof Error ? error.message : '请稍后重试',
+        variant: 'destructive'
       });
     } finally {
       setIsLoading(false);
@@ -137,4 +137,4 @@ export function RegisterForm(props: React.HTMLAttributes<HTMLDivElement>) {
       </form>
     </div>
   );
-} 
+}

@@ -1,10 +1,17 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { UseFormReturn } from "react-hook-form"
-import type { ChannelFormData } from "@/lib/db/schema/channels"
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { UseFormReturn } from 'react-hook-form';
+import type { ChannelFormData } from '@/lib/db/schema/channels';
 
 interface BarkFieldsProps {
-  form: UseFormReturn<ChannelFormData>
+  form: UseFormReturn<ChannelFormData>;
 }
 
 export function BarkFields({ form }: BarkFieldsProps) {
@@ -20,10 +27,10 @@ export function BarkFields({ form }: BarkFieldsProps) {
               <span className="text-red-500 ml-1">*</span>
             </FormLabel>
             <FormControl>
-              <Input 
-                placeholder="https://api.day.app/YOUR_DEVICE_KEY/" 
+              <Input
+                placeholder="https://api.day.app/YOUR_DEVICE_KEY/"
                 className="font-mono"
-                {...field} 
+                {...field}
               />
             </FormControl>
             <FormDescription>
@@ -34,5 +41,5 @@ export function BarkFields({ form }: BarkFieldsProps) {
         )}
       />
     </>
-  )
-} 
+  );
+}

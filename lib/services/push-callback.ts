@@ -3,8 +3,8 @@
  * 发送异步推送的回调请求
  */
 
-import { PushResponseType } from '@/lib/types/push-response'
-import { pushLogger } from '@/lib/utils/push-logger'
+import { PushResponseType } from '@/lib/types/push-response';
+import { pushLogger } from '@/lib/utils/push-logger';
 
 /**
  * 发送回调请求
@@ -22,15 +22,15 @@ export async function sendCallback(
 ): Promise<boolean> {
   if (!callbackUrl) {
     // pushLogger.debug(traceId, 'Callback', 'No callback url provided, skipping callback dispatch')
-    return false
+    return false;
   }
 
-  const controller = new AbortController()
-  let timeoutId: ReturnType<typeof setTimeout> | undefined
+  const controller = new AbortController();
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
   // 仅当timeout被明确指定且有效时才设置超时
   if (timeout !== undefined && Number.isFinite(timeout) && timeout > 0) {
-    timeoutId = setTimeout(() => controller.abort(), timeout)
+    timeoutId = setTimeout(() => controller.abort(), timeout);
   }
 
   try {
@@ -38,7 +38,7 @@ export async function sendCallback(
       url: callbackUrl,
       dataType: data.type,
       timeout: timeout ?? 'no limit'
-    })
+    });
 
     const response = await fetch(callbackUrl, {
       method: 'POST',
@@ -48,31 +48,31 @@ export async function sendCallback(
       },
       body: JSON.stringify(data),
       signal: controller.signal
-    })
+    });
 
     if (response.ok) {
       pushLogger.info(traceId, 'Callback', 'Callback sent successfully', {
         statusCode: response.status,
         url: callbackUrl
-      })
-      return true
+      });
+      return true;
     } else {
       pushLogger.warn(traceId, 'Callback', 'Callback response error', {
         statusCode: response.status,
         url: callbackUrl
-      })
-      return false
+      });
+      return false;
     }
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
-      pushLogger.error(traceId, 'Callback', 'Callback timeout', error)
+      pushLogger.error(traceId, 'Callback', 'Callback timeout', error);
     } else {
-      pushLogger.error(traceId, 'Callback', 'Callback request failed', error)
+      pushLogger.error(traceId, 'Callback', 'Callback request failed', error);
     }
-    return false
+    return false;
   } finally {
     if (timeoutId !== undefined) {
-      clearTimeout(timeoutId)
+      clearTimeout(timeoutId);
     }
   }
 }
@@ -99,10 +99,15 @@ export function sendCallbackAsync(
           'Callback',
           'Background callback failed (ignored)',
           new Error('callback did not complete successfully')
-        )
+        );
       }
     })
     .catch((error) => {
-      pushLogger.warn(traceId, 'Callback', 'Background callback failed (ignored)', error)
-    })
+      pushLogger.warn(
+        traceId,
+        'Callback',
+        'Background callback failed (ignored)',
+        error
+      );
+    });
 }
