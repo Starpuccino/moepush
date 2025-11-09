@@ -1,0 +1,17 @@
+node_modules
+dist
+.next
+out
+build
+coverage
+.vercel
+.env
+.env.local
+.env.*.local
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+.turbo
+drizzle
+.wrangler
+components/ui

@@ -1,28 +1,28 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2 } from "lucide-react"
-import { useState, useEffect } from "react"
-import { ChannelDialog } from "@/components/channel-dialog"
-import { Channel, CHANNEL_LABELS } from "@/lib/channels"
-import { useToast } from "@/components/ui/use-toast"
-import { StatusBadge } from "@/components/ui/status-badge"
-import { formatDate } from "@/lib/utils"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal, Loader2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ChannelDialog } from '@/components/channel-dialog';
+import { Channel, CHANNEL_LABELS } from '@/lib/channels';
+import { useToast } from '@/components/ui/use-toast';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { formatDate } from '@/lib/utils';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -31,67 +31,67 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { useRouter } from "next/navigation"
-import { deleteChannel } from "@/lib/services/channels"
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { useRouter } from 'next/navigation';
+import { deleteChannel } from '@/lib/services/channels';
 
 interface ChannelTableProps {
-  channels: Channel[]
+  channels: Channel[];
 }
 
 export function ChannelTable({ channels }: ChannelTableProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [channelsState, setChannels] = useState(channels)
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState('');
+  const [channelsState, setChannels] = useState(channels);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   useEffect(() => {
-    setChannels(channels)
-  }, [channels])
+    setChannels(channels);
+  }, [channels]);
 
   const filteredChannels = channelsState.filter((channel) => {
-    if (!searchQuery.trim()) return true
-    
+    if (!searchQuery.trim()) return true;
+
     const searchContent = [
       channel.id,
       channel.name,
       CHANNEL_LABELS[channel.type]
-    ].join(" ").toLowerCase()
-    
-    const keywords = searchQuery.toLowerCase().split(/\s+/)
-    return keywords.every(keyword => searchContent.includes(keyword))
-  })
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    const keywords = searchQuery.toLowerCase().split(/\s+/);
+    return keywords.every((keyword) => searchContent.includes(keyword));
+  });
 
   const handleDelete = async () => {
-    if (!channelToDelete) return
-    
+    if (!channelToDelete) return;
+
     try {
-      setIsDeleting(true)
-      await deleteChannel(channelToDelete.id)
-      toast({ title: '删除成功' })
-      router.refresh()
-      setChannels(channelsState.filter(c => c.id !== channelToDelete.id))
-      setDeleteDialogOpen(false)
+      setIsDeleting(true);
+      await deleteChannel(channelToDelete.id);
+      toast({ title: '删除成功' });
+      router.refresh();
+      setChannels(channelsState.filter((c) => c.id !== channelToDelete.id));
+      setDeleteDialogOpen(false);
     } catch (error) {
-      console.error('Error deleting channel:', error)
-      toast({ 
+      console.error('Error deleting channel:', error);
+      toast({
         title: '删除失败',
         variant: 'destructive'
-      })
+      });
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
-
-
-  const getChannelText = (type: Channel["type"]) => {
-    return CHANNEL_LABELS[type]
-  }
+  const getChannelText = (type: Channel['type']) => {
+    return CHANNEL_LABELS[type];
+  };
 
   return (
     <div className="space-y-4">
@@ -122,8 +122,11 @@ export function ChannelTable({ channels }: ChannelTableProps) {
           <TableBody>
             {filteredChannels.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
-                  {searchQuery ? "未找到匹配的渠道" : "暂无渠道"}
+                <TableCell
+                  colSpan={7}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  {searchQuery ? '未找到匹配的渠道' : '暂无渠道'}
                 </TableCell>
               </TableRow>
             ) : (
@@ -139,20 +142,21 @@ export function ChannelTable({ channels }: ChannelTableProps) {
                   <TableCell>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                        >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <ChannelDialog 
-                          mode="edit"
-                          channel={channel}
-                        />
-                        <DropdownMenuItem 
+                        <ChannelDialog mode="edit" channel={channel} />
+                        <DropdownMenuItem
                           className="text-red-600"
                           onClick={() => {
-                            setChannelToDelete(channel)
-                            setDeleteDialogOpen(true)
+                            setChannelToDelete(channel);
+                            setDeleteDialogOpen(true);
                           }}
                         >
                           删除
@@ -177,10 +181,7 @@ export function ChannelTable({ channels }: ChannelTableProps) {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isDeleting}
-              onClick={handleDelete}
-            >
+            <AlertDialogAction disabled={isDeleting} onClick={handleDelete}>
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               确认
             </AlertDialogAction>
@@ -188,5 +189,5 @@ export function ChannelTable({ channels }: ChannelTableProps) {
         </AlertDialogContent>
       </AlertDialog>
     </div>
-  )
-} 
+  );
+}

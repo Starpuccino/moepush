@@ -1,18 +1,18 @@
-"use client"
+'use client';
 
-import { Input } from "@/components/ui/input"
+import { Input } from '@/components/ui/input';
 import {
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { UseFormReturn } from "react-hook-form"
-import type { ChannelFormData } from "@/lib/db/schema/channels"
+  FormMessage
+} from '@/components/ui/form';
+import { UseFormReturn } from 'react-hook-form';
+import type { ChannelFormData } from '@/lib/db/schema/channels';
 
 interface WecomAppFieldsProps {
-  form: UseFormReturn<ChannelFormData>
+  form: UseFormReturn<ChannelFormData>;
 }
 
 export function WecomAppFields({ form }: WecomAppFieldsProps) {
@@ -23,7 +23,8 @@ export function WecomAppFields({ form }: WecomAppFieldsProps) {
         name="corpId"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>企业ID (corpId)
+            <FormLabel>
+              企业ID (corpId)
               <span className="text-red-500 ml-1">*</span>
             </FormLabel>
             <FormControl>
@@ -38,7 +39,8 @@ export function WecomAppFields({ form }: WecomAppFieldsProps) {
         name="agentId"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>应用ID (agentId)
+            <FormLabel>
+              应用ID (agentId)
               <span className="text-red-500 ml-1">*</span>
             </FormLabel>
             <FormControl>
@@ -53,14 +55,15 @@ export function WecomAppFields({ form }: WecomAppFieldsProps) {
         name="secret"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>应用Secret
+            <FormLabel>
+              应用Secret
               <span className="text-red-500 ml-1">*</span>
             </FormLabel>
             <FormControl>
-              <Input 
+              <Input
                 type="password"
-                placeholder="请输入企业微信应用的Secret" 
-                {...field} 
+                placeholder="请输入企业微信应用的Secret"
+                {...field}
               />
             </FormControl>
             <FormMessage />
@@ -68,5 +71,5 @@ export function WecomAppFields({ form }: WecomAppFieldsProps) {
         )}
       />
     </>
-  )
-} 
+  );
+}

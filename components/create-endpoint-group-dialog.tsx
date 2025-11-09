@@ -1,11 +1,11 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Loader2 } from "lucide-react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { useRouter } from "next/navigation"
+import { useState } from 'react';
+import { Loader2 } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useRouter } from 'next/navigation';
 
 import {
   Dialog,
@@ -13,33 +13,33 @@ import {
   DialogDescription,
   DialogFooter,
   DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+  DialogTitle
+} from '@/components/ui/dialog';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
-import { createEndpointGroup } from "@/lib/services/endpoint-groups"
-import { Endpoint } from "@/lib/db/schema/endpoints"
+  FormMessage
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { useToast } from '@/components/ui/use-toast';
+import { createEndpointGroup } from '@/lib/services/endpoint-groups';
+import { Endpoint } from '@/lib/db/schema/endpoints';
 
 const createEndpointGroupSchema = z.object({
-  name: z.string().min(1, "名称不能为空"),
-})
+  name: z.string().min(1, '名称不能为空')
+});
 
-type CreateEndpointGroupFormValues = z.infer<typeof createEndpointGroupSchema>
+type CreateEndpointGroupFormValues = z.infer<typeof createEndpointGroupSchema>;
 
 interface CreateEndpointGroupDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  selectedEndpoints: Endpoint[] // 使用正确的类型
-  onSuccess: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  selectedEndpoints: Endpoint[]; // 使用正确的类型
+  onSuccess: () => void;
 }
 
 export function CreateEndpointGroupDialog({
@@ -48,46 +48,46 @@ export function CreateEndpointGroupDialog({
   selectedEndpoints,
   onSuccess
 }: CreateEndpointGroupDialogProps) {
-  const [isPending, setIsPending] = useState(false)
-  const { toast } = useToast()
-  const router = useRouter()
+  const [isPending, setIsPending] = useState(false);
+  const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<CreateEndpointGroupFormValues>({
     resolver: zodResolver(createEndpointGroupSchema),
     defaultValues: {
-      name: "",
-    },
-  })
+      name: ''
+    }
+  });
 
   async function onSubmit(data: CreateEndpointGroupFormValues) {
     if (selectedEndpoints.length === 0) {
       toast({
-        variant: "destructive",
-        description: "请至少选择一个接口",
-      })
-      return
+        variant: 'destructive',
+        description: '请至少选择一个接口'
+      });
+      return;
     }
 
     try {
-      setIsPending(true)
+      setIsPending(true);
       await createEndpointGroup({
         ...data,
-        endpointIds: selectedEndpoints.map(e => e.id),
-      })
-      
-      toast({ description: "接口组创建成功" })
-      onOpenChange(false)
-      form.reset()
-      onSuccess()
-      router.refresh()
+        endpointIds: selectedEndpoints.map((e) => e.id)
+      });
+
+      toast({ description: '接口组创建成功' });
+      onOpenChange(false);
+      form.reset();
+      onSuccess();
+      router.refresh();
     } catch (error) {
-      console.error('创建接口组失败:', error)
+      console.error('创建接口组失败:', error);
       toast({
-        variant: "destructive",
-        description: "创建接口组失败，请重试"
-      })
+        variant: 'destructive',
+        description: '创建接口组失败，请重试'
+      });
     } finally {
-      setIsPending(false)
+      setIsPending(false);
     }
   }
 
@@ -100,7 +100,7 @@ export function CreateEndpointGroupDialog({
             创建一个包含多个接口的接口组，可以通过一个请求触发多个接口
           </DialogDescription>
         </DialogHeader>
-        
+
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
@@ -119,24 +119,29 @@ export function CreateEndpointGroupDialog({
                 </FormItem>
               )}
             />
-            
+
             <div>
-              <h3 className="mb-2 text-sm font-medium">已选择的接口 ({selectedEndpoints.length})</h3>
+              <h3 className="mb-2 text-sm font-medium">
+                已选择的接口 ({selectedEndpoints.length})
+              </h3>
               <div className="max-h-[200px] overflow-y-auto p-2 border rounded-md">
                 <ul className="space-y-1">
-                  {selectedEndpoints.map(endpoint => (
-                    <li key={endpoint.id} className="text-sm text-muted-foreground">
+                  {selectedEndpoints.map((endpoint) => (
+                    <li
+                      key={endpoint.id}
+                      className="text-sm text-muted-foreground"
+                    >
                       {endpoint.name}
                     </li>
                   ))}
                 </ul>
               </div>
             </div>
-            
+
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
+              <Button
+                type="button"
+                variant="outline"
                 onClick={() => onOpenChange(false)}
               >
                 取消
@@ -150,5 +155,5 @@ export function CreateEndpointGroupDialog({
         </Form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

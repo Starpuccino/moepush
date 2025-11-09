@@ -1,11 +1,11 @@
-import { Metadata } from "next";
-import Link from "next/link";
-import { Suspense } from "react";
-import { LoginForm } from "@/components/auth/login-form";
+import { Metadata } from 'next';
+import Link from 'next/link';
+import { Suspense } from 'react';
+import { LoginForm } from '@/components/auth/login-form';
 
 export const metadata: Metadata = {
-  title: "登录 - MoePush",
-  description: "登录到 MoePush",
+  title: '登录 - MoePush',
+  description: '登录到 MoePush'
 };
 
 export default function LoginPage() {
@@ -22,27 +22,21 @@ export default function LoginPage() {
         </div>
         <div className="relative z-20 mt-auto">
           <blockquote className="space-y-2">
-            <p className="text-lg">
-              简单易用的消息推送服务
-            </p>
+            <p className="text-lg">简单易用的消息推送服务</p>
           </blockquote>
         </div>
       </div>
       <div className="lg:p-8">
         <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
           <div className="flex flex-col space-y-2 text-center">
-            <h1 className="text-2xl font-semibold tracking-tight">
-              欢迎回来
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              请选择以下方式登录
-            </p>
+            <h1 className="text-2xl font-semibold tracking-tight">欢迎回来</h1>
+            <p className="text-sm text-muted-foreground">请选择以下方式登录</p>
           </div>
           <Suspense>
             <LoginForm />
           </Suspense>
           <p className="px-8 text-center text-sm text-muted-foreground">
-            还没有账号?{" "}
+            还没有账号?{' '}
             <Link
               href="/register"
               className="underline underline-offset-4 hover:text-primary"
@@ -54,4 +48,4 @@ export default function LoginPage() {
       </div>
     </div>
   );
-} 
+}

@@ -1,10 +1,17 @@
-import { FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { UseFormReturn } from "react-hook-form"
-import type { ChannelFormData } from "@/lib/db/schema/channels"
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { UseFormReturn } from 'react-hook-form';
+import type { ChannelFormData } from '@/lib/db/schema/channels';
 
 interface WebhookFieldsProps {
-  form: UseFormReturn<ChannelFormData>
+  form: UseFormReturn<ChannelFormData>;
 }
 
 export function WebhookFields({ form }: WebhookFieldsProps) {
@@ -20,10 +27,10 @@ export function WebhookFields({ form }: WebhookFieldsProps) {
               <span className="text-red-500 ml-1">*</span>
             </FormLabel>
             <FormControl>
-              <Input 
-                placeholder="https://example.com/api/webhook" 
+              <Input
+                placeholder="https://example.com/api/webhook"
                 className="font-mono"
-                {...field} 
+                {...field}
               />
             </FormControl>
             <FormDescription>
@@ -34,5 +41,5 @@ export function WebhookFields({ form }: WebhookFieldsProps) {
         )}
       />
     </>
-  )
-} 
+  );
+}

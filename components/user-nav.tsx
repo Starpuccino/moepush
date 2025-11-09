@@ -1,38 +1,38 @@
-"use client"
+'use client';
 
-import { LogOut } from "lucide-react"
-import { signOut } from "next-auth/react"
-import { useRouter } from "next/navigation"
+import { LogOut } from 'lucide-react';
+import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { Button } from '@/components/ui/button';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserNavProps {
   user: {
-    name?: string | null
-    image?: string | null
-    username?: string | null
-  }
+    name?: string | null;
+    image?: string | null;
+    username?: string | null;
+  };
 }
 
 export function UserNav({ user }: UserNavProps) {
-  const router = useRouter()
-  const name = user.name || user.username || "未知用户"
-  const initials = name?.charAt(0).toUpperCase() || "U"
+  const router = useRouter();
+  const name = user.name || user.username || '未知用户';
+  const initials = name?.charAt(0).toUpperCase() || 'U';
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-8 w-8 rounded-full">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.image || ""} alt={name} />
+            <AvatarImage src={user.image || ''} alt={name} />
             <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
         </Button>
@@ -52,10 +52,10 @@ export function UserNav({ user }: UserNavProps) {
         <DropdownMenuItem
           onClick={() => {
             signOut({
-              redirect: false,
-            })
-            router.push("/")
-            router.refresh()
+              redirect: false
+            });
+            router.push('/');
+            router.refresh();
           }}
         >
           <LogOut className="mr-2 h-4 w-4" />
@@ -63,5 +63,5 @@ export function UserNav({ user }: UserNavProps) {
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
-  )
-} 
+  );
+}

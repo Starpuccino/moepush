@@ -1,6 +1,6 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
@@ -8,92 +8,95 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog"
+  DialogTrigger
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
+  SelectValue
+} from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
-} from "@/components/ui/form"
-import { Plus, Loader2 } from "lucide-react"
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { insertChannelSchema } from "@/lib/db/schema/channels"
-import type { ChannelFormData } from "@/lib/db/schema/channels"
-import { useToast } from "@/components/ui/use-toast"
-import { Channel, CHANNEL_LABELS, CHANNEL_TYPES } from "@/lib/channels"
-import { DropdownMenuItem } from "@/components/ui/dropdown-menu"
-import { useRouter } from "next/navigation"
-import { createChannel, updateChannel } from "@/lib/services/channels"
-import { ChannelFormFields } from "./channel-form"
+  FormMessage
+} from '@/components/ui/form';
+import { Plus, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { insertChannelSchema } from '@/lib/db/schema/channels';
+import type { ChannelFormData } from '@/lib/db/schema/channels';
+import { useToast } from '@/components/ui/use-toast';
+import { Channel, CHANNEL_LABELS, CHANNEL_TYPES } from '@/lib/channels';
+import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
+import { useRouter } from 'next/navigation';
+import { createChannel, updateChannel } from '@/lib/services/channels';
+import { ChannelFormFields } from './channel-form';
 
 interface ChannelDialogProps {
-  mode?: "create" | "edit"
-  channel?: Channel
+  mode?: 'create' | 'edit';
+  channel?: Channel;
 }
 
-export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) {
-  const [open, setOpen] = useState(false)
-  const [isPending, setIsPending] = useState(false)
-  const { toast } = useToast()
-  const [selectedType, setSelectedType] = useState(channel?.type)
-  const router = useRouter()
+export function ChannelDialog({
+  mode = 'create',
+  channel
+}: ChannelDialogProps) {
+  const [open, setOpen] = useState(false);
+  const [isPending, setIsPending] = useState(false);
+  const { toast } = useToast();
+  const [selectedType, setSelectedType] = useState(channel?.type);
+  const router = useRouter();
 
   const form = useForm<ChannelFormData>({
     resolver: zodResolver(insertChannelSchema),
     defaultValues: {
-      name: channel?.name || "",
+      name: channel?.name || '',
       type: channel?.type || CHANNEL_TYPES.DINGTALK,
-      webhook: channel?.webhook || "",
-      secret: channel?.secret || "",
-      corpId: channel?.corpId || "",
-      agentId: channel?.agentId || "",
-      botToken: channel?.botToken || "",
-      chatId: channel?.chatId || "",
-    },
-  })
+      webhook: channel?.webhook || '',
+      secret: channel?.secret || '',
+      corpId: channel?.corpId || '',
+      agentId: channel?.agentId || '',
+      botToken: channel?.botToken || '',
+      chatId: channel?.chatId || ''
+    }
+  });
 
   async function onSubmit(data: ChannelFormData) {
-    console.log('onSubmit', data)
+    console.log('onSubmit', data);
     try {
-      setIsPending(true)
-      if (mode === "edit" && channel) {
-        await updateChannel(channel.id, data)
-        toast({ description: "渠道已更新" })
+      setIsPending(true);
+      if (mode === 'edit' && channel) {
+        await updateChannel(channel.id, data);
+        toast({ description: '渠道已更新' });
       } else {
-        await createChannel(data)
-        toast({ description: "渠道已创建" })
+        await createChannel(data);
+        toast({ description: '渠道已创建' });
       }
-      setOpen(false)
-      form.reset()
-      router.refresh()
+      setOpen(false);
+      form.reset();
+      router.refresh();
     } catch (error) {
-      console.error('Channel dialog error:', error)
+      console.error('Channel dialog error:', error);
       toast({
-        variant: "destructive",
-        description: mode === "edit" ? "更新失败，请重试" : "创建失败，请重试" 
-      })
+        variant: 'destructive',
+        description: mode === 'edit' ? '更新失败，请重试' : '创建失败，请重试'
+      });
     } finally {
-      setIsPending(false)
+      setIsPending(false);
     }
   }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {mode === "edit" ? (
+        {mode === 'edit' ? (
           <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
             编辑
           </DropdownMenuItem>
@@ -107,14 +110,19 @@ export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) 
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
-            {mode === "edit" ? "编辑推送渠道" : "新建推送渠道"}
+            {mode === 'edit' ? '编辑推送渠道' : '新建推送渠道'}
           </DialogTitle>
           <DialogDescription>
-            {mode === "edit" ? "修改现有的推送渠道" : "添加一个新的消息推送渠道"}
+            {mode === 'edit'
+              ? '修改现有的推送渠道'
+              : '添加一个新的消息推送渠道'}
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="grid gap-4 py-4"
+          >
             <FormField
               control={form.control}
               name="name"
@@ -140,13 +148,13 @@ export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) 
                     类型
                     <span className="text-red-500 ml-1">*</span>
                   </FormLabel>
-                  <Select 
+                  <Select
                     onValueChange={(value) => {
-                      field.onChange(value as keyof typeof CHANNEL_TYPES)
-                      setSelectedType(value as any)
+                      field.onChange(value as keyof typeof CHANNEL_TYPES);
+                      setSelectedType(value as any);
                     }}
                     value={selectedType}
-                    disabled={mode === "edit"}
+                    disabled={mode === 'edit'}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -165,22 +173,20 @@ export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) 
                 </FormItem>
               )}
             />
-            
+
             {selectedType && (
-              <ChannelFormFields 
-                type={selectedType} 
-                form={form} 
-              />
+              <ChannelFormFields type={selectedType} form={form} />
             )}
-            
+
             <DialogFooter>
-              <Button variant="outline" onClick={() => setOpen(false)} type="button">
+              <Button
+                variant="outline"
+                onClick={() => setOpen(false)}
+                type="button"
+              >
                 取消
               </Button>
-              <Button 
-                type="submit"
-                disabled={isPending}
-              >
+              <Button type="submit" disabled={isPending}>
                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 提交
               </Button>
@@ -189,5 +195,5 @@ export function ChannelDialog({ mode = "create", channel }: ChannelDialogProps) 
         </Form>
       </DialogContent>
     </Dialog>
-  )
-} 
+  );
+}

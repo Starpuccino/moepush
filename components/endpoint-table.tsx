@@ -1,31 +1,41 @@
-"use client"
+'use client';
 
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table"
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal, Loader2, Eye, Power, Trash, Pencil, Zap, Plus, Copy } from "lucide-react"
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import {
+  MoreHorizontal,
+  Loader2,
+  Eye,
+  Power,
+  Trash,
+  Pencil,
+  Zap,
+  Plus,
+  Copy
+} from 'lucide-react';
 import {
   Popover,
   PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover"
-import { useState } from "react"
-import { EndpointDialog } from "@/components/endpoint-dialog"
-import { Endpoint } from "@/lib/db/schema/endpoints"
-import { useToast } from "@/components/ui/use-toast"
+  PopoverTrigger
+} from '@/components/ui/popover';
+import { useState } from 'react';
+import { EndpointDialog } from '@/components/endpoint-dialog';
+import { Endpoint } from '@/lib/db/schema/endpoints';
+import { useToast } from '@/components/ui/use-toast';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,182 +44,191 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Channel } from "@/lib/channels"
-import { EndpointExample } from "@/components/endpoint-example"
-import { useRouter } from "next/navigation"
-import { deleteEndpoint, toggleEndpointStatus, testEndpoint, copyEndpoint } from "@/lib/services/endpoints"
-import { generateExampleBody } from "@/lib/generator"
-import { Checkbox } from "@/components/ui/checkbox"
-import { CreateEndpointGroupDialog } from "./create-endpoint-group-dialog"
-import { TestPushDialog } from "./test-push-dialog"
-import { StatusBadge } from "@/components/ui/status-badge"
-import { formatDate } from "@/lib/utils"
-import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Channel } from '@/lib/channels';
+import { EndpointExample } from '@/components/endpoint-example';
+import { useRouter } from 'next/navigation';
+import {
+  deleteEndpoint,
+  toggleEndpointStatus,
+  testEndpoint,
+  copyEndpoint
+} from '@/lib/services/endpoints';
+import { generateExampleBody } from '@/lib/generator';
+import { Checkbox } from '@/components/ui/checkbox';
+import { CreateEndpointGroupDialog } from './create-endpoint-group-dialog';
+import { TestPushDialog } from './test-push-dialog';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { formatDate } from '@/lib/utils';
+import { ENDPOINT_STATUS } from '@/lib/constants/endpoints';
 
 interface EndpointTableProps {
-  endpoints: Endpoint[]
-  channels: Channel[]
-  onEndpointsUpdate: () => void
-  onGroupCreated: () => void
+  endpoints: Endpoint[];
+  channels: Channel[];
+  onEndpointsUpdate: () => void;
+  onGroupCreated: () => void;
 }
 
-export function EndpointTable({ 
+export function EndpointTable({
   endpoints,
   channels,
   onEndpointsUpdate,
-  onGroupCreated,
+  onGroupCreated
 }: EndpointTableProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [isTesting, setIsTesting] = useState<string | null>(null)
-  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
-  const [endpointToCopy, setEndpointToCopy] = useState<Endpoint | null>(null)
-  const [isCopying, setIsCopying] = useState(false)
-  const [copyName, setCopyName] = useState("")
-  const [copyStatus, setCopyStatus] = useState<typeof ENDPOINT_STATUS[keyof typeof ENDPOINT_STATUS]>(ENDPOINT_STATUS.INACTIVE)
-  const { toast } = useToast()
-  const [viewExample, setViewExample] = useState<Endpoint | null>(null)
-  const router = useRouter()
-  const [selectedEndpoints, setSelectedEndpoints] = useState<Endpoint[]>([])
-  const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState<string | null>(null)
-  const [testDialogOpen, setTestDialogOpen] = useState(false)
-  const [endpointToTest, setEndpointToTest] = useState<Endpoint | null>(null)
-  const [testInitialContent, setTestInitialContent] = useState("")
+  const [searchQuery, setSearchQuery] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [endpointToDelete, setEndpointToDelete] = useState<Endpoint | null>(
+    null
+  );
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isTesting, setIsTesting] = useState<string | null>(null);
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const [endpointToCopy, setEndpointToCopy] = useState<Endpoint | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyName, setCopyName] = useState('');
+  const [copyStatus, setCopyStatus] = useState<
+    (typeof ENDPOINT_STATUS)[keyof typeof ENDPOINT_STATUS]
+  >(ENDPOINT_STATUS.INACTIVE);
+  const { toast } = useToast();
+  const [viewExample, setViewExample] = useState<Endpoint | null>(null);
+  const router = useRouter();
+  const [selectedEndpoints, setSelectedEndpoints] = useState<Endpoint[]>([]);
+  const [createGroupDialogOpen, setCreateGroupDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [endpointToTest, setEndpointToTest] = useState<Endpoint | null>(null);
+  const [testInitialContent, setTestInitialContent] = useState('');
 
-  const filteredEndpoints = endpoints?.filter((endpoint) => {
-    if (!searchQuery.trim()) return true
-    
-    const channel = channels.find(c => c.id === endpoint.channelId)
-    const searchContent = [
-      endpoint.id,
-      endpoint.name,
-      endpoint.rule,
-      channel?.name,
-    ].join(" ").toLowerCase()
-    
-    const keywords = searchQuery.toLowerCase().split(/\s+/)
-    return keywords.every(keyword => searchContent.includes(keyword))
-  }) ?? []
+  const filteredEndpoints =
+    endpoints?.filter((endpoint) => {
+      if (!searchQuery.trim()) return true;
+
+      const channel = channels.find((c) => c.id === endpoint.channelId);
+      const searchContent = [
+        endpoint.id,
+        endpoint.name,
+        endpoint.rule,
+        channel?.name
+      ]
+        .join(' ')
+        .toLowerCase();
+
+      const keywords = searchQuery.toLowerCase().split(/\s+/);
+      return keywords.every((keyword) => searchContent.includes(keyword));
+    }) ?? [];
 
   const handleDelete = async () => {
-    if (!endpointToDelete) return
-    
+    if (!endpointToDelete) return;
+
     try {
-      setIsDeleting(true)
-      await deleteEndpoint(endpointToDelete.id)
-      onEndpointsUpdate()
-      toast({ description: "接口已删除" })
-      router.refresh()
-      setDeleteDialogOpen(false)
+      setIsDeleting(true);
+      await deleteEndpoint(endpointToDelete.id);
+      onEndpointsUpdate();
+      toast({ description: '接口已删除' });
+      router.refresh();
+      setDeleteDialogOpen(false);
     } catch (error) {
-      console.error('Error deleting endpoint:', error)
-      toast({ 
-        variant: "destructive",
-        description: "删除失败，请重试" 
-      })
+      console.error('Error deleting endpoint:', error);
+      toast({
+        variant: 'destructive',
+        description: '删除失败，请重试'
+      });
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
+  };
 
   const handleToggleStatus = async (id: string) => {
     try {
-      setIsLoading(id)
-      await toggleEndpointStatus(id)
-      
-      onEndpointsUpdate()
-      
+      setIsLoading(id);
+      await toggleEndpointStatus(id);
+
+      onEndpointsUpdate();
+
       toast({
-        description: "推送接口状态已更新",
-      })
+        description: '推送接口状态已更新'
+      });
     } catch (error) {
       toast({
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "操作失败",
-      })
+        variant: 'destructive',
+        description: error instanceof Error ? error.message : '操作失败'
+      });
     } finally {
-      setIsLoading(null)
+      setIsLoading(null);
     }
-  }
+  };
 
   const handleCopy = async () => {
-    if (!endpointToCopy || !copyName.trim()) return
-    
+    if (!endpointToCopy || !copyName.trim()) return;
+
     try {
-      setIsCopying(true)
-      await copyEndpoint(endpointToCopy.id, copyName, copyStatus)
-      onEndpointsUpdate()
-      toast({ description: "接口已复制" })
-      setCopyDialogOpen(false)
-      setCopyName("")
-      setCopyStatus(ENDPOINT_STATUS.INACTIVE)
-      router.refresh()
+      setIsCopying(true);
+      await copyEndpoint(endpointToCopy.id, copyName, copyStatus);
+      onEndpointsUpdate();
+      toast({ description: '接口已复制' });
+      setCopyDialogOpen(false);
+      setCopyName('');
+      setCopyStatus(ENDPOINT_STATUS.INACTIVE);
+      router.refresh();
     } catch (error) {
-      console.error('Error copying endpoint:', error)
-      toast({ 
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "复制失败，请重试" 
-      })
+      console.error('Error copying endpoint:', error);
+      toast({
+        variant: 'destructive',
+        description: error instanceof Error ? error.message : '复制失败，请重试'
+      });
     } finally {
-      setIsCopying(false)
+      setIsCopying(false);
     }
-  }
+  };
 
   async function handleTest(testData: any) {
-    if (!endpointToTest) return
+    if (!endpointToTest) return;
 
-    setIsTesting(endpointToTest.id)
+    setIsTesting(endpointToTest.id);
     try {
-      await testEndpoint(
-        endpointToTest.id,
-        endpointToTest.rule,
-        testData
-      )
+      await testEndpoint(endpointToTest.id, endpointToTest.rule, testData);
       toast({
-        title: "测试成功",
-        description: "消息已成功推送",
-      })
+        title: '测试成功',
+        description: '消息已成功推送'
+      });
     } catch (error) {
-      console.error('Test endpoint error:', error)
+      console.error('Test endpoint error:', error);
       toast({
-        title: "测试失败",
-        description: error instanceof Error ? error.message : "请检查配置是否正确",
-        variant: "destructive",
-      })
-      throw error // 重新抛出错误，让 TestPushDialog 知道测试失败了
+        title: '测试失败',
+        description:
+          error instanceof Error ? error.message : '请检查配置是否正确',
+        variant: 'destructive'
+      });
+      throw error; // 重新抛出错误，让 TestPushDialog 知道测试失败了
     } finally {
-      setIsTesting(null)
+      setIsTesting(null);
     }
   }
 
   const toggleEndpointSelection = (endpoint: Endpoint) => {
-    setSelectedEndpoints(prev => {
-      const isSelected = prev.some(e => e.id === endpoint.id)
+    setSelectedEndpoints((prev) => {
+      const isSelected = prev.some((e) => e.id === endpoint.id);
       if (isSelected) {
-        return prev.filter(e => e.id !== endpoint.id)
+        return prev.filter((e) => e.id !== endpoint.id);
       } else {
-        return [...prev, endpoint]
+        return [...prev, endpoint];
       }
-    })
-  }
+    });
+  };
 
   const handleCreateGroup = () => {
     if (selectedEndpoints.length === 0) {
-      toast({ 
-        variant: "destructive", 
-        description: "请至少选择一个接口" 
-      })
-      return
+      toast({
+        variant: 'destructive',
+        description: '请至少选择一个接口'
+      });
+      return;
     }
-    setCreateGroupDialogOpen(true)
-  }
+    setCreateGroupDialogOpen(true);
+  };
 
   return (
     <div className="space-y-4">
@@ -224,20 +243,17 @@ export function EndpointTable({
         </div>
         <div className="flex space-x-2">
           {selectedEndpoints.length > 0 && (
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className="gap-2" 
+            <Button
+              size="sm"
+              variant="outline"
+              className="gap-2"
               onClick={handleCreateGroup}
             >
               <Plus className="h-4 w-4" />
               创建接口组 ({selectedEndpoints.length})
             </Button>
           )}
-          <EndpointDialog 
-            channels={channels}
-            onSuccess={onEndpointsUpdate}
-          />
+          <EndpointDialog channels={channels} onSuccess={onEndpointsUpdate} />
         </div>
       </div>
 
@@ -258,19 +274,28 @@ export function EndpointTable({
           <TableBody>
             {filteredEndpoints.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                  {searchQuery ? "未找到匹配的接口" : "暂无接口"}
+                <TableCell
+                  colSpan={8}
+                  className="h-24 text-center text-muted-foreground"
+                >
+                  {searchQuery ? '未找到匹配的接口' : '暂无接口'}
                 </TableCell>
               </TableRow>
             ) : (
               filteredEndpoints.map((endpoint) => {
-                const channel = channels.find(c => c.id === endpoint.channelId)
+                const channel = channels.find(
+                  (c) => c.id === endpoint.channelId
+                );
                 return (
                   <TableRow key={endpoint.id}>
                     <TableCell>
-                      <Checkbox 
-                        checked={selectedEndpoints.some(e => e.id === endpoint.id)}
-                        onCheckedChange={() => toggleEndpointSelection(endpoint)}
+                      <Checkbox
+                        checked={selectedEndpoints.some(
+                          (e) => e.id === endpoint.id
+                        )}
+                        onCheckedChange={() =>
+                          toggleEndpointSelection(endpoint)
+                        }
                       />
                     </TableCell>
                     <TableCell className="font-mono">{endpoint.id}</TableCell>
@@ -285,7 +310,11 @@ export function EndpointTable({
                         </PopoverTrigger>
                         <PopoverContent className="w-[400px]">
                           <pre className="font-mono text-sm whitespace-pre-wrap break-all bg-muted p-2 rounded-md">
-                            {JSON.stringify(JSON.parse(endpoint.rule || "{}"), null, 2)}
+                            {JSON.stringify(
+                              JSON.parse(endpoint.rule || '{}'),
+                              null,
+                              2
+                            )}
                           </pre>
                         </PopoverContent>
                       </Popover>
@@ -297,7 +326,11 @@ export function EndpointTable({
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                          >
                             <MoreHorizontal className="h-4 w-4" />
                           </Button>
                         </DropdownMenuTrigger>
@@ -310,23 +343,34 @@ export function EndpointTable({
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
-                              setEndpointToTest(endpoint)
-                              const exampleBody = generateExampleBody(endpoint.rule)
+                              setEndpointToTest(endpoint);
+                              const exampleBody = generateExampleBody(
+                                endpoint.rule
+                              );
                               // 如果生成的示例体为空对象或只有默认消息，且规则包含 ${body}，则使用纯文本
-                              const ruleHasBodyOnly = endpoint.rule.includes('${body}') && !endpoint.rule.includes('${body.')
-                              if (ruleHasBodyOnly && Object.keys(exampleBody).length <= 1) {
-                                setTestInitialContent("示例消息内容")
+                              const ruleHasBodyOnly =
+                                endpoint.rule.includes('${body}') &&
+                                !endpoint.rule.includes('${body.');
+                              if (
+                                ruleHasBodyOnly &&
+                                Object.keys(exampleBody).length <= 1
+                              ) {
+                                setTestInitialContent('示例消息内容');
                               } else {
-                                setTestInitialContent(JSON.stringify(exampleBody, null, 4))
+                                setTestInitialContent(
+                                  JSON.stringify(exampleBody, null, 4)
+                                );
                               }
-                              setTestDialogOpen(true)
+                              setTestDialogOpen(true);
                             }}
-                            disabled={endpoint.status !== ENDPOINT_STATUS.ACTIVE}
+                            disabled={
+                              endpoint.status !== ENDPOINT_STATUS.ACTIVE
+                            }
                           >
                             <Zap className="mr-2 h-4 w-4" />
                             测试推送
                           </DropdownMenuItem>
-                          <EndpointDialog 
+                          <EndpointDialog
                             mode="edit"
                             endpoint={endpoint}
                             channels={channels}
@@ -335,10 +379,10 @@ export function EndpointTable({
                           />
                           <DropdownMenuItem
                             onClick={() => {
-                              setEndpointToCopy(endpoint)
-                              setCopyName(`${endpoint.name}-副本`)
-                              setCopyStatus(endpoint.status)
-                              setCopyDialogOpen(true)
+                              setEndpointToCopy(endpoint);
+                              setCopyName(`${endpoint.name}-副本`);
+                              setCopyStatus(endpoint.status);
+                              setCopyDialogOpen(true);
                             }}
                           >
                             <Copy className="h-4 w-4 mr-2" />
@@ -351,11 +395,11 @@ export function EndpointTable({
                             <Power className="h-4 w-4 mr-2" />
                             {endpoint.status === 'active' ? '禁用' : '启用'}
                           </DropdownMenuItem>
-                          <DropdownMenuItem 
+                          <DropdownMenuItem
                             className="text-red-600"
                             onClick={() => {
-                              setEndpointToDelete(endpoint)
-                              setDeleteDialogOpen(true)
+                              setEndpointToDelete(endpoint);
+                              setDeleteDialogOpen(true);
                             }}
                           >
                             <Trash className="h-4 w-4 mr-2" />
@@ -365,7 +409,7 @@ export function EndpointTable({
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })
             )}
           </TableBody>
@@ -382,10 +426,7 @@ export function EndpointTable({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isDeleting}
-              onClick={handleDelete}
-            >
+            <AlertDialogAction disabled={isDeleting} onClick={handleDelete}>
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               确认
             </AlertDialogAction>
@@ -421,7 +462,13 @@ export function EndpointTable({
                 <Switch
                   id="copy-status"
                   checked={copyStatus === ENDPOINT_STATUS.ACTIVE}
-                  onCheckedChange={(checked) => setCopyStatus(checked ? ENDPOINT_STATUS.ACTIVE : ENDPOINT_STATUS.INACTIVE)}
+                  onCheckedChange={(checked) =>
+                    setCopyStatus(
+                      checked
+                        ? ENDPOINT_STATUS.ACTIVE
+                        : ENDPOINT_STATUS.INACTIVE
+                    )
+                  }
                 />
               </div>
             </div>
@@ -461,15 +508,15 @@ export function EndpointTable({
         onOpenChange={(open) => !open && setViewExample(null)}
       />
 
-      <CreateEndpointGroupDialog 
-        open={createGroupDialogOpen} 
+      <CreateEndpointGroupDialog
+        open={createGroupDialogOpen}
         onOpenChange={setCreateGroupDialogOpen}
         selectedEndpoints={selectedEndpoints}
         onSuccess={() => {
-          setSelectedEndpoints([])
-          onGroupCreated()
+          setSelectedEndpoints([]);
+          onGroupCreated();
         }}
       />
     </div>
-  )
-} 
+  );
+}

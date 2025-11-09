@@ -1,7 +1,7 @@
-"use client"
+'use client';
 
-import { useState } from "react"
-import { Loader2, Trash, Eye, Power, Send, Pencil, Copy } from "lucide-react"
+import { useState } from 'react';
+import { Loader2, Trash, Eye, Power, Send, Pencil, Copy } from 'lucide-react';
 
 import {
   Table,
@@ -9,8 +9,8 @@ import {
   TableCell,
   TableHead,
   TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+  TableRow
+} from '@/components/ui/table';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,182 +19,201 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
-import { Label } from "@/components/ui/label"
-import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/components/ui/use-toast"
-import { EndpointGroupWithEndpoints } from "@/types/endpoint-group"
-import { deleteEndpointGroup, toggleEndpointGroupStatus, testEndpointGroup, copyEndpointGroup } from "@/lib/services/endpoint-groups"
-import { formatDate } from "@/lib/utils"
-import { generateExampleBody } from "@/lib/generator"
-import { EndpointGroupExample } from "./endpoint-group-example"
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useToast } from '@/components/ui/use-toast';
+import { EndpointGroupWithEndpoints } from '@/types/endpoint-group';
+import {
+  deleteEndpointGroup,
+  toggleEndpointGroupStatus,
+  testEndpointGroup,
+  copyEndpointGroup
+} from '@/lib/services/endpoint-groups';
+import { formatDate } from '@/lib/utils';
+import { generateExampleBody } from '@/lib/generator';
+import { EndpointGroupExample } from './endpoint-group-example';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MoreHorizontal } from "lucide-react"
-import { EndpointGroupDialog } from "./endpoint-group-dialog"
-import { Endpoint } from "@/lib/db/schema/endpoints"
-import { TestPushDialog } from "./test-push-dialog"
-import { StatusBadge } from "@/components/ui/status-badge"
-import { ENDPOINT_STATUS } from "@/lib/constants/endpoints"
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
+import { EndpointGroupDialog } from './endpoint-group-dialog';
+import { Endpoint } from '@/lib/db/schema/endpoints';
+import { TestPushDialog } from './test-push-dialog';
+import { StatusBadge } from '@/components/ui/status-badge';
+import { ENDPOINT_STATUS } from '@/lib/constants/endpoints';
 
 interface EndpointGroupTableProps {
-  groups: EndpointGroupWithEndpoints[]
-  availableEndpoints: Endpoint[]
-  onGroupsUpdate: () => void
+  groups: EndpointGroupWithEndpoints[];
+  availableEndpoints: Endpoint[];
+  onGroupsUpdate: () => void;
 }
 
-export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate }: EndpointGroupTableProps) {
-  const [searchQuery, setSearchQuery] = useState("")
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
-  const [groupToDelete, setGroupToDelete] = useState<EndpointGroupWithEndpoints | null>(null)
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [viewExample, setViewExample] = useState<EndpointGroupWithEndpoints | null>(null)
-  const [isLoading, setIsLoading] = useState<string | null>(null)
-  const [isTesting, setIsTesting] = useState<string | null>(null)
-  const [copyDialogOpen, setCopyDialogOpen] = useState(false)
-  const [groupToCopy, setGroupToCopy] = useState<EndpointGroupWithEndpoints | null>(null)
-  const [isCopying, setIsCopying] = useState(false)
-  const [copyName, setCopyName] = useState("")
-  const [copyStatus, setCopyStatus] = useState<typeof ENDPOINT_STATUS[keyof typeof ENDPOINT_STATUS]>(ENDPOINT_STATUS.INACTIVE)
-  const [testDialogOpen, setTestDialogOpen] = useState(false)
-  const [groupToTest, setGroupToTest] = useState<EndpointGroupWithEndpoints | null>(null)
-  const [testInitialContent, setTestInitialContent] = useState("")
-  const { toast } = useToast()
-  
+export function EndpointGroupTable({
+  groups,
+  availableEndpoints,
+  onGroupsUpdate
+}: EndpointGroupTableProps) {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [groupToDelete, setGroupToDelete] =
+    useState<EndpointGroupWithEndpoints | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [viewExample, setViewExample] =
+    useState<EndpointGroupWithEndpoints | null>(null);
+  const [isLoading, setIsLoading] = useState<string | null>(null);
+  const [isTesting, setIsTesting] = useState<string | null>(null);
+  const [copyDialogOpen, setCopyDialogOpen] = useState(false);
+  const [groupToCopy, setGroupToCopy] =
+    useState<EndpointGroupWithEndpoints | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
+  const [copyName, setCopyName] = useState('');
+  const [copyStatus, setCopyStatus] = useState<
+    (typeof ENDPOINT_STATUS)[keyof typeof ENDPOINT_STATUS]
+  >(ENDPOINT_STATUS.INACTIVE);
+  const [testDialogOpen, setTestDialogOpen] = useState(false);
+  const [groupToTest, setGroupToTest] =
+    useState<EndpointGroupWithEndpoints | null>(null);
+  const [testInitialContent, setTestInitialContent] = useState('');
+  const { toast } = useToast();
+
   const filteredGroups = groups.filter((group) => {
-    if (!searchQuery.trim()) return true
-    
+    if (!searchQuery.trim()) return true;
+
     const searchContent = [
       group.id,
       group.name,
-      ...group.endpoints.map(e => e.name)
-    ].join(" ").toLowerCase()
-    
-    const keywords = searchQuery.toLowerCase().split(/\s+/)
-    return keywords.every(keyword => searchContent.includes(keyword))
-  })
-  
+      ...group.endpoints.map((e) => e.name)
+    ]
+      .join(' ')
+      .toLowerCase();
+
+    const keywords = searchQuery.toLowerCase().split(/\s+/);
+    return keywords.every((keyword) => searchContent.includes(keyword));
+  });
+
   const handleDelete = async () => {
-    if (!groupToDelete) return
-    
+    if (!groupToDelete) return;
+
     try {
-      setIsDeleting(true)
-      await deleteEndpointGroup(groupToDelete.id)
-      onGroupsUpdate()
-      toast({ description: "接口组已删除" })
-      setDeleteDialogOpen(false)
+      setIsDeleting(true);
+      await deleteEndpointGroup(groupToDelete.id);
+      onGroupsUpdate();
+      toast({ description: '接口组已删除' });
+      setDeleteDialogOpen(false);
     } catch (error) {
-      console.error('Error deleting endpoint group:', error)
-      toast({ 
-        variant: "destructive",
-        description: "删除失败，请重试" 
-      })
+      console.error('Error deleting endpoint group:', error);
+      toast({
+        variant: 'destructive',
+        description: '删除失败，请重试'
+      });
     } finally {
-      setIsDeleting(false)
+      setIsDeleting(false);
     }
-  }
-  
+  };
+
   const handleToggleStatus = async (id: string) => {
     try {
-      setIsLoading(id)
-      await toggleEndpointGroupStatus(id)
-      
-      onGroupsUpdate()
+      setIsLoading(id);
+      await toggleEndpointGroupStatus(id);
+
+      onGroupsUpdate();
       toast({
-        description: "接口组状态已更新",
-      })
+        description: '接口组状态已更新'
+      });
     } catch (error) {
       toast({
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "操作失败",
-      })
+        variant: 'destructive',
+        description: error instanceof Error ? error.message : '操作失败'
+      });
     } finally {
-      setIsLoading(null)
+      setIsLoading(null);
     }
-  }
-  
+  };
+
   const handleCopy = async () => {
-    if (!groupToCopy || !copyName.trim()) return
-    
+    if (!groupToCopy || !copyName.trim()) return;
+
     try {
-      setIsCopying(true)
-      await copyEndpointGroup(groupToCopy.id, copyName, copyStatus)
-      onGroupsUpdate()
-      toast({ description: "接口组已复制" })
-      setCopyDialogOpen(false)
-      setCopyName("")
-      setCopyStatus(ENDPOINT_STATUS.INACTIVE)
+      setIsCopying(true);
+      await copyEndpointGroup(groupToCopy.id, copyName, copyStatus);
+      onGroupsUpdate();
+      toast({ description: '接口组已复制' });
+      setCopyDialogOpen(false);
+      setCopyName('');
+      setCopyStatus(ENDPOINT_STATUS.INACTIVE);
     } catch (error) {
-      console.error('Error copying endpoint group:', error)
-      toast({ 
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "复制失败，请重试" 
-      })
+      console.error('Error copying endpoint group:', error);
+      toast({
+        variant: 'destructive',
+        description: error instanceof Error ? error.message : '复制失败，请重试'
+      });
     } finally {
-      setIsCopying(false)
+      setIsCopying(false);
     }
-  }
-  
+  };
+
   const handleTest = async (testData: any) => {
-    if (!groupToTest) return
+    if (!groupToTest) return;
 
     if (groupToTest.endpoints.length === 0) {
       toast({
-        variant: "destructive",
-        description: "接口组内没有接口，无法测试"
-      })
-      throw new Error("接口组内没有接口")
+        variant: 'destructive',
+        description: '接口组内没有接口，无法测试'
+      });
+      throw new Error('接口组内没有接口');
     }
 
     // 检查是否所有接口都有规则
-    const hasInvalidRule = groupToTest.endpoints.some(e => !e.rule)
+    const hasInvalidRule = groupToTest.endpoints.some((e) => !e.rule);
     if (hasInvalidRule) {
       toast({
-        variant: "destructive",
-        description: "接口组中存在未配置规则的接口"
-      })
-      throw new Error("接口组中存在未配置规则的接口")
+        variant: 'destructive',
+        description: '接口组中存在未配置规则的接口'
+      });
+      throw new Error('接口组中存在未配置规则的接口');
     }
 
-    setIsTesting(groupToTest.id)
+    setIsTesting(groupToTest.id);
     try {
-      const result = await testEndpointGroup(groupToTest, testData)
+      const result = await testEndpointGroup(groupToTest, testData);
       toast({
-        title: "测试结果",
+        title: '测试结果',
         description: `成功: ${result.successCount}, 失败: ${result.failedCount}`,
-        variant: result.failedCount > 0 ? "destructive" : "default"
-      })
+        variant: result.failedCount > 0 ? 'destructive' : 'default'
+      });
     } catch (error) {
       toast({
-        variant: "destructive",
-        description: error instanceof Error ? error.message : "测试失败"
-      })
-      throw error
+        variant: 'destructive',
+        description: error instanceof Error ? error.message : '测试失败'
+      });
+      throw error;
     } finally {
-      setIsTesting(null)
+      setIsTesting(null);
     }
-  }
-  
+  };
+
   const getEndpointCountDisplay = (group: EndpointGroupWithEndpoints) => {
-    const totalCount = group.endpoints.length
-    const activeCount = group.endpoints.filter(e => e.status === "active").length
-    const inactiveCount = totalCount - activeCount
+    const totalCount = group.endpoints.length;
+    const activeCount = group.endpoints.filter(
+      (e) => e.status === 'active'
+    ).length;
+    const inactiveCount = totalCount - activeCount;
 
     if (inactiveCount === 0) {
-      return <span>{totalCount}</span>
+      return <span>{totalCount}</span>;
     }
 
     return (
@@ -210,9 +229,9 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
-    )
-  }
-  
+    );
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex justify-between">
@@ -224,7 +243,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
             className="h-9"
           />
         </div>
-        <EndpointGroupDialog 
+        <EndpointGroupDialog
           availableEndpoints={availableEndpoints}
           onSuccess={onGroupsUpdate}
         />
@@ -252,9 +271,7 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
             ) : (
               filteredGroups.map((group) => (
                 <TableRow key={group.id}>
-                  <TableCell className="font-mono">
-                    {group.id}
-                  </TableCell>
+                  <TableCell className="font-mono">{group.id}</TableCell>
                   <TableCell className="font-medium">{group.name}</TableCell>
                   <TableCell>{getEndpointCountDisplay(group)}</TableCell>
                   <TableCell>
@@ -275,25 +292,38 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                         </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
-                            setGroupToTest(group)
-                            const allRules = group.endpoints.flatMap(e => e.rule ? [e.rule] : [])
-                            const combinedRule = allRules.join('\n')
-                            const exampleBody = generateExampleBody(allRules.length > 0 ? combinedRule : '{}')
+                            setGroupToTest(group);
+                            const allRules = group.endpoints.flatMap((e) =>
+                              e.rule ? [e.rule] : []
+                            );
+                            const combinedRule = allRules.join('\n');
+                            const exampleBody = generateExampleBody(
+                              allRules.length > 0 ? combinedRule : '{}'
+                            );
                             // 如果任一规则包含 ${body}（不带点号），且生成的示例体为空或只有默认消息，则使用纯文本
-                            const hasBodyOnly = allRules.some(rule => rule.includes('${body}') && !rule.includes('${body.'))
-                            if (hasBodyOnly && Object.keys(exampleBody).length <= 1) {
-                              setTestInitialContent("示例消息内容")
+                            const hasBodyOnly = allRules.some(
+                              (rule) =>
+                                rule.includes('${body}') &&
+                                !rule.includes('${body.')
+                            );
+                            if (
+                              hasBodyOnly &&
+                              Object.keys(exampleBody).length <= 1
+                            ) {
+                              setTestInitialContent('示例消息内容');
                             } else {
-                              setTestInitialContent(JSON.stringify(exampleBody, null, 4))
+                              setTestInitialContent(
+                                JSON.stringify(exampleBody, null, 4)
+                              );
                             }
-                            setTestDialogOpen(true)
+                            setTestDialogOpen(true);
                           }}
                           disabled={group.status === ENDPOINT_STATUS.INACTIVE}
                         >
                           <Send className="mr-2 h-4 w-4" />
                           测试推送
                         </DropdownMenuItem>
-                        <EndpointGroupDialog 
+                        <EndpointGroupDialog
                           mode="edit"
                           group={group}
                           availableEndpoints={availableEndpoints}
@@ -302,30 +332,32 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                         />
                         <DropdownMenuItem
                           onClick={() => {
-                            setGroupToCopy(group)
-                            setCopyName(`${group.name}-副本`)
-                            setCopyStatus(group.status)
-                            setCopyDialogOpen(true)
+                            setGroupToCopy(group);
+                            setCopyName(`${group.name}-副本`);
+                            setCopyStatus(group.status);
+                            setCopyDialogOpen(true);
                           }}
                         >
                           <Copy className="mr-2 h-4 w-4" />
                           复制
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => handleToggleStatus(group.id)}
                           disabled={isLoading === group.id}
                         >
                           <Power className="mr-2 h-4 w-4" />
                           {isLoading === group.id ? (
                             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          ) : group.status === 'active' ? (
+                            '禁用'
                           ) : (
-                            group.status === "active" ? "禁用" : "启用"
+                            '启用'
                           )}
                         </DropdownMenuItem>
-                        <DropdownMenuItem 
+                        <DropdownMenuItem
                           onClick={() => {
-                            setGroupToDelete(group)
-                            setDeleteDialogOpen(true)
+                            setGroupToDelete(group);
+                            setDeleteDialogOpen(true);
                           }}
                           className="text-red-600"
                         >
@@ -347,15 +379,13 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
           <AlertDialogHeader>
             <AlertDialogTitle>确认删除</AlertDialogTitle>
             <AlertDialogDescription>
-              确定要删除接口组 {groupToDelete?.name} 吗？此操作不会删除组内的接口，但无法撤销。
+              确定要删除接口组 {groupToDelete?.name}{' '}
+              吗？此操作不会删除组内的接口，但无法撤销。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>取消</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isDeleting}
-              onClick={handleDelete}
-            >
+            <AlertDialogAction disabled={isDeleting} onClick={handleDelete}>
               {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               确认
             </AlertDialogAction>
@@ -391,7 +421,13 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
                 <Switch
                   id="copy-group-status"
                   checked={copyStatus === ENDPOINT_STATUS.ACTIVE}
-                  onCheckedChange={(checked) => setCopyStatus(checked ? ENDPOINT_STATUS.ACTIVE : ENDPOINT_STATUS.INACTIVE)}
+                  onCheckedChange={(checked) =>
+                    setCopyStatus(
+                      checked
+                        ? ENDPOINT_STATUS.ACTIVE
+                        : ENDPOINT_STATUS.INACTIVE
+                    )
+                  }
                 />
               </div>
             </div>
@@ -426,12 +462,12 @@ export function EndpointGroupTable({ groups, availableEndpoints, onGroupsUpdate 
         isTesting={isTesting === groupToTest?.id}
         onTest={handleTest}
       />
-      
+
       <EndpointGroupExample
         group={viewExample}
         open={!!viewExample}
         onOpenChange={(open) => !open && setViewExample(null)}
       />
     </div>
-  )
-} 
+  );
+}

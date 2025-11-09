@@ -1,8 +1,8 @@
-import { Loader2, Github } from "lucide-react";
+import { Loader2, Github } from 'lucide-react';
 
 export const Icons = {
   spinner: Loader2,
-  gitHub: Github,
+  gitHub: Github
 };
 
-export type Icon = keyof typeof Icons; 
+export type Icon = keyof typeof Icons;
