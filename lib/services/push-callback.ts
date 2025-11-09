@@ -11,29 +11,33 @@ import { pushLogger } from '@/lib/utils/push-logger'
  * @param callbackUrl 回调地址
  * @param data 回调数据
  * @param traceId 追踪ID
- * @param timeout 超时时间（毫秒）
+ * @param timeout 超时时间（毫秒），未提供时无限等待
  * @returns 是否成功发送
  */
 export async function sendCallback(
   callbackUrl: string | null,
   data: PushResponseType,
   traceId: string,
-  timeout: number = 5000
+  timeout?: number
 ): Promise<boolean> {
   if (!callbackUrl) {
     // pushLogger.debug(traceId, 'Callback', 'No callback url provided, skipping callback dispatch')
     return false
   }
 
-  const safeTimeout = Number.isFinite(timeout) && timeout > 0 ? timeout : 10000
   const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), safeTimeout)
+  let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+  // 仅当timeout被明确指定且有效时才设置超时
+  if (timeout !== undefined && Number.isFinite(timeout) && timeout > 0) {
+    timeoutId = setTimeout(() => controller.abort(), timeout)
+  }
 
   try {
     pushLogger.debug(traceId, 'Callback', 'Sending callback', {
       url: callbackUrl,
       dataType: data.type,
-      timeout: safeTimeout
+      timeout: timeout ?? 'no limit'
     })
 
     const response = await fetch(callbackUrl, {
@@ -67,7 +71,9 @@ export async function sendCallback(
     }
     return false
   } finally {
-    clearTimeout(timeoutId)
+    if (timeoutId !== undefined) {
+      clearTimeout(timeoutId)
+    }
   }
 }
 
@@ -76,16 +82,27 @@ export async function sendCallback(
  * @param callbackUrl 回调地址
  * @param data 回调数据
  * @param traceId 追踪ID
- * @param timeout 超时时间
+ * @param timeout 超时时间（毫秒），未提供时无限等待
  */
 export function sendCallbackAsync(
   callbackUrl: string | null,
   data: PushResponseType,
   traceId: string,
-  timeout: number = 5000
+  timeout?: number
 ): void {
   // 在后台发送回调，不等待结果
-  void sendCallback(callbackUrl, data, traceId, timeout).catch((error) => {
-    pushLogger.warn(traceId, 'Callback', 'Background callback failed (ignored)', error)
-  })
+  void sendCallback(callbackUrl, data, traceId, timeout)
+    .then((success) => {
+      if (callbackUrl && !success) {
+        pushLogger.warn(
+          traceId,
+          'Callback',
+          'Background callback failed (ignored)',
+          new Error('callback did not complete successfully')
+        )
+      }
+    })
+    .catch((error) => {
+      pushLogger.warn(traceId, 'Callback', 'Background callback failed (ignored)', error)
+    })
 }
