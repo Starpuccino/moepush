@@ -5,6 +5,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     reporters: 'default',
+    watch: false,
     coverage: {
       reporter: ['text', 'html'],
       reportsDirectory: 'coverage'
