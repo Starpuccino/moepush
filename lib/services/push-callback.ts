@@ -1,0 +1,91 @@
+/**
+ * 推送回调服务
+ * 发送异步推送的回调请求
+ */
+
+import { PushResponseType } from '@/lib/types/push-response'
+import { pushLogger } from '@/lib/utils/push-logger'
+
+/**
+ * 发送回调请求
+ * @param callbackUrl 回调地址
+ * @param data 回调数据
+ * @param traceId 追踪ID
+ * @param timeout 超时时间（毫秒）
+ * @returns 是否成功发送
+ */
+export async function sendCallback(
+  callbackUrl: string | null,
+  data: PushResponseType,
+  traceId: string,
+  timeout: number = 5000
+): Promise<boolean> {
+  if (!callbackUrl) {
+    // pushLogger.debug(traceId, 'Callback', 'No callback url provided, skipping callback dispatch')
+    return false
+  }
+
+  const safeTimeout = Number.isFinite(timeout) && timeout > 0 ? timeout : 10000
+  const controller = new AbortController()
+  const timeoutId = setTimeout(() => controller.abort(), safeTimeout)
+
+  try {
+    pushLogger.debug(traceId, 'Callback', 'Sending callback', {
+      url: callbackUrl,
+      dataType: data.type,
+      timeout: safeTimeout
+    })
+
+    const response = await fetch(callbackUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Trace-Id': traceId
+      },
+      body: JSON.stringify(data),
+      signal: controller.signal
+    })
+
+    if (response.ok) {
+      pushLogger.info(traceId, 'Callback', 'Callback sent successfully', {
+        statusCode: response.status,
+        url: callbackUrl
+      })
+      return true
+    } else {
+      pushLogger.warn(traceId, 'Callback', 'Callback response error', {
+        statusCode: response.status,
+        url: callbackUrl
+      })
+      return false
+    }
+  } catch (error) {
+    if (error instanceof Error && error.name === 'AbortError') {
+      pushLogger.error(traceId, 'Callback', 'Callback timeout', error)
+    } else {
+      pushLogger.error(traceId, 'Callback', 'Callback request failed', error)
+    }
+    return false
+  } finally {
+    clearTimeout(timeoutId)
+  }
+}
+
+/**
+ * 在后台异步发送回调（不等待结果）
+ * @param callbackUrl 回调地址
+ * @param data 回调数据
+ * @param traceId 追踪ID
+ * @param timeout 超时时间
+ */
+export function sendCallbackAsync(
+  callbackUrl: string | null,
+  data: PushResponseType,
+  traceId: string,
+  timeout: number = 5000
+): void {
+  // 在后台发送回调，不等待结果
+  void sendCallback(callbackUrl, data, traceId, timeout).catch((error) => {
+    pushLogger.warn(traceId, 'Callback', 'Background callback failed (ignored)', error)
+  })
+}
