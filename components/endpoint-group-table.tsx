@@ -194,6 +194,7 @@ export function EndpointGroupTable({
         description: `成功: ${result.successCount}, 失败: ${result.failedCount}`,
         variant: result.failedCount > 0 ? 'destructive' : 'default'
       });
+      return result;
     } catch (error) {
       toast({
         variant: 'destructive',

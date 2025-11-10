@@ -189,11 +189,12 @@ export function EndpointTable({
 
     setIsTesting(endpointToTest.id);
     try {
-      await testEndpoint(endpointToTest.id, endpointToTest.rule, testData);
+      const response = await testEndpoint(endpointToTest.id, endpointToTest.rule, testData);
       toast({
         title: '测试成功',
         description: '消息已成功推送'
       });
+      return response;
     } catch (error) {
       console.error('Test endpoint error:', error);
       toast({
@@ -202,7 +203,7 @@ export function EndpointTable({
           error instanceof Error ? error.message : '请检查配置是否正确',
         variant: 'destructive'
       });
-      throw error; // 重新抛出错误，让 TestPushDialog 知道测试失败了
+      throw error;
     } finally {
       setIsTesting(null);
     }
