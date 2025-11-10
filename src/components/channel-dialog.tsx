@@ -27,7 +27,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Plus, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertChannelSchema } from '@/lib/db/schema/channels';
@@ -74,6 +74,23 @@ export function ChannelDialog({
       chatId: channel?.chatId || ''
     }
   });
+
+  // 当 open 状态或 channel 改变时，重新初始化表单和状态
+  useEffect(() => {
+    if (open) {
+      setSelectedType(channel?.type);
+      form.reset({
+        name: channel?.name || '',
+        type: channel?.type || CHANNEL_TYPES.DINGTALK,
+        webhook: channel?.webhook || '',
+        secret: channel?.secret || '',
+        corpId: channel?.corpId || '',
+        agentId: channel?.agentId || '',
+        botToken: channel?.botToken || '',
+        chatId: channel?.chatId || ''
+      });
+    }
+  }, [open, channel, form]);
 
   async function onSubmit(data: ChannelFormData) {
     console.log('onSubmit', data);

@@ -27,7 +27,7 @@ import {
   FormMessage
 } from '@/components/ui/form';
 import { Plus, Loader2 } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { insertEndpointSchema } from '@/lib/db/schema/endpoints';
@@ -95,6 +95,23 @@ export function EndpointDialog({
       rule: endpoint?.rule ?? ''
     }
   });
+
+  // 当 open 状态或 endpoint 改变时，重新初始化表单和状态
+  useEffect(() => {
+    if (open) {
+      const newChannelType = getInitialChannelType(channels, endpoint);
+      const newTemplateType = getInitialTemplateType(endpoint);
+      
+      setSelectedChannelType(newChannelType);
+      setSelectedTemplateType(newTemplateType);
+      
+      form.reset({
+        name: endpoint?.name ?? '',
+        channelId: endpoint?.channelId ?? '',
+        rule: endpoint?.rule ?? ''
+      });
+    }
+  }, [open, endpoint, channels, form]);
 
   const templates = selectedChannelType
     ? CHANNEL_TEMPLATES[selectedChannelType]
