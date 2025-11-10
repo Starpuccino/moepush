@@ -8,6 +8,7 @@ import { users, accounts } from '@/lib/db/schema';
 import { authSchema } from './validation';
 import { comparePassword } from './utils';
 import { generateAvatarUrl } from './avatar';
+import config from './constants/config';
 
 export const {
   handlers: { GET, POST },
@@ -15,7 +16,7 @@ export const {
   signIn,
   signOut
 } = NextAuth(() => ({
-  secret: process.env.AUTH_SECRET!,
+  secret: config.AUTH_SECRET!,
   adapter: DrizzleAdapter(getDb(), {
     usersTable: users,
     accountsTable: accounts
@@ -25,8 +26,8 @@ export const {
   },
   providers: [
     GithubProvider({
-      clientId: process.env.AUTH_GITHUB_ID!,
-      clientSecret: process.env.AUTH_GITHUB_SECRET!
+      clientId: config.AUTH_GITHUB_ID!,
+      clientSecret: config.AUTH_GITHUB_SECRET!
     }),
     CredentialsProvider({
       name: 'credentials',

@@ -16,13 +16,20 @@ interface EndpointGroupExampleProps {
   group: EndpointGroupWithEndpoints | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  config?: {
+    pushTimeout: number;
+    callbackTimeout: number;
+  };
 }
 
 export function EndpointGroupExample({
   group,
   open,
-  onOpenChange
+  onOpenChange,
+  config
 }: EndpointGroupExampleProps) {
+  const pushTimeout = config?.pushTimeout;
+  const callbackTimeout = config?.callbackTimeout;
   const [origin, setOrigin] = useState('');
 
   useEffect(() => {
@@ -42,12 +49,34 @@ export function EndpointGroupExample({
 
   const curlExample = `curl -X POST "${origin}/api/push-group/${group.id}" \\
   -H "Content-Type: application/json" \\
+  -H "X-Timeout: ${pushTimeout}" \\
+  -H "X-Trace-Id: trace-group-001" \\
+  -d '${exampleJson}'`;
+
+  const curlCallbackExample = `curl -X POST "${origin}/api/push-group/${group.id}" \\
+  -H "Content-Type: application/json" \\
+  -H "X-Timeout: ${pushTimeout}" \\
+  -H "X-Callback-Url: https://example.com/webhook" \\
+  -H "X-Callback-Timeout: ${callbackTimeout}" \\
   -d '${exampleJson}'`;
 
   const fetchExample = `await fetch("${origin}/api/push-group/${group.id}", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      "X-Timeout": "${pushTimeout}",
+      "X-Trace-Id": "trace-group-001",
+    },
+    body: JSON.stringify(${exampleJson})
+})`;
+
+  const fetchCallbackExample = `await fetch("${origin}/api/push-group/${group.id}", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Timeout": "${pushTimeout}",
+      "X-Callback-Url": "https://example.com/webhook",
+      "X-Callback-Timeout": "${callbackTimeout}",
     },
     body: JSON.stringify(${exampleJson})
 })`;
@@ -81,8 +110,10 @@ export function EndpointGroupExample({
 
           <Tabs defaultValue="curl">
             <TabsList>
-              <TabsTrigger value="curl">cURL</TabsTrigger>
-              <TabsTrigger value="fetch">Fetch</TabsTrigger>
+              <TabsTrigger value="curl">cURL (同步)</TabsTrigger>
+              <TabsTrigger value="curl-callback">cURL (异步回调)</TabsTrigger>
+              <TabsTrigger value="fetch">Fetch (同步)</TabsTrigger>
+              <TabsTrigger value="fetch-callback">Fetch (异步回调)</TabsTrigger>
             </TabsList>
             <TabsContent value="curl" className="mt-4">
               <div className="rounded-lg bg-muted p-4">
@@ -90,12 +121,44 @@ export function EndpointGroupExample({
                   {curlExample}
                 </pre>
               </div>
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                <p>• <strong>X-Timeout</strong>: 推送超时时间（毫秒{pushTimeout ? `，当前默认：${pushTimeout}` : ''}）</p>
+                <p>• <strong>X-Trace-Id</strong>: 自定义追踪 ID（可选，服务端会自动生成）</p>
+              </div>
+            </TabsContent>
+            <TabsContent value="curl-callback" className="mt-4">
+              <div className="rounded-lg bg-muted p-4">
+                <pre className="text-sm whitespace-pre-wrap break-all font-mono">
+                  {curlCallbackExample}
+                </pre>
+              </div>
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                <p>• <strong>X-Timeout</strong>: 推送超时时间（毫秒{pushTimeout ? `，当前默认：${pushTimeout}` : ''}）</p>
+                <p>• <strong>X-Callback-Url</strong>: 异步回调地址（存在此 Header 时启用异步模式）</p>
+                <p>• <strong>X-Callback-Timeout</strong>: 回调超时时间（毫秒{callbackTimeout ? `，当前默认：${callbackTimeout}` : ''}）</p>
+              </div>
             </TabsContent>
             <TabsContent value="fetch" className="mt-4">
               <div className="rounded-lg bg-muted p-4">
                 <pre className="text-sm whitespace-pre-wrap break-all font-mono">
                   {fetchExample}
                 </pre>
+              </div>
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                <p>• <strong>X-Timeout</strong>: 推送超时时间（毫秒{pushTimeout ? `，当前默认：${pushTimeout}` : ''}）</p>
+                <p>• <strong>X-Trace-Id</strong>: 自定义追踪 ID（可选，服务端会自动生成）</p>
+              </div>
+            </TabsContent>
+            <TabsContent value="fetch-callback" className="mt-4">
+              <div className="rounded-lg bg-muted p-4">
+                <pre className="text-sm whitespace-pre-wrap break-all font-mono">
+                  {fetchCallbackExample}
+                </pre>
+              </div>
+              <div className="mt-3 text-xs text-muted-foreground space-y-1">
+                <p>• <strong>X-Timeout</strong>: 推送超时时间（毫秒{pushTimeout ? `，当前默认：${pushTimeout}` : ''}）</p>
+                <p>• <strong>X-Callback-Url</strong>: 异步回调地址（存在此 Header 时启用异步模式）</p>
+                <p>• <strong>X-Callback-Timeout</strong>: 回调超时时间（毫秒{callbackTimeout ? `，当前默认：${callbackTimeout}` : ''}）</p>
               </div>
             </TabsContent>
           </Tabs>

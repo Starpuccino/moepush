@@ -7,6 +7,11 @@ declare global {
     AUTH_GITHUB_ID: string;
     AUTH_GITHUB_SECRET: string;
     DISABLE_REGISTER: string;
+    PUSH_TIMEOUT: string;
+    PUSH_GROUP_CONCURRENCY: string;
+    CALLBACK_TIMEOUT: string;
+    LOG_LEVEL: string;
+    LOG_DIR: string;
   }
 
   type Env = CloudflareEnv

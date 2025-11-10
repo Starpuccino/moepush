@@ -3,9 +3,7 @@
  * 提供结构化日志记录，支持 traceId 追踪
  */
 
-import { DEFAULT_LOG_LEVEL } from '../constants/config';
-
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
+import config, { type LogLevel } from '../constants/config';
 
 interface LogEntry {
   timestamp: string;
@@ -18,14 +16,8 @@ interface LogEntry {
 }
 
 class PushLogger {
-  private logLevel: LogLevel = DEFAULT_LOG_LEVEL;
-
-  constructor() {
-    // 从环境变量读取日志级别（不区分大小写，默认为 debug）
-    const level = process.env.LOG_LEVEL?.toLowerCase() as LogLevel | undefined;
-    if (level && ['debug', 'info', 'warn', 'error'].includes(level)) {
-      this.logLevel = level;
-    }
+  private get logLevel(): LogLevel {
+    return config.LOG_LEVEL;
   }
 
   /**

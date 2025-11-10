@@ -19,13 +19,8 @@ import {
   getCallbackUrl,
   getPositiveIntHeader,
   getTraceId,
-  parsePositiveInt
 } from '@/lib/utils/request-headers';
-import {
-  DEFAULT_CALLBACK_TIMEOUT,
-  DEFAULT_PUSH_GROUP_CONCURRENCY,
-  DEFAULT_PUSH_TIMEOUT
-} from '@/lib/constants/config';
+import config from '@/lib/constants/config';
 
 export const runtime = 'edge';
 
@@ -126,18 +121,15 @@ export async function POST(
   const timeout = getPositiveIntHeader(
     request.headers,
     'X-Timeout',
-    parsePositiveInt(process.env.PUSH_TIMEOUT, DEFAULT_PUSH_TIMEOUT)
+    config.PUSH_TIMEOUT
   );
   const callbackUrl = getCallbackUrl(request.headers);
   const callbackTimeout = getCallbackTimeout(
     request.headers,
-    parsePositiveInt(process.env.CALLBACK_TIMEOUT, DEFAULT_CALLBACK_TIMEOUT)
+    config.CALLBACK_TIMEOUT
   );
   const isAsync = Boolean(callbackUrl);
-  const concurrency = parsePositiveInt(
-    process.env.PUSH_GROUP_CONCURRENCY,
-    DEFAULT_PUSH_GROUP_CONCURRENCY
-  );
+  const concurrency = config.PUSH_GROUP_CONCURRENCY;
 
   pushLogger.info(traceId, 'GroupPushRequest', 'Received group push request', {
     groupId: (await params).id,
