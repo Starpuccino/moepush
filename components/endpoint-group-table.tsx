@@ -59,12 +59,17 @@ interface EndpointGroupTableProps {
   groups: EndpointGroupWithEndpoints[];
   availableEndpoints: Endpoint[];
   onGroupsUpdate: () => void;
+  config: {
+    pushTimeout: number;
+    callbackTimeout: number;
+  };
 }
 
 export function EndpointGroupTable({
   groups,
   availableEndpoints,
-  onGroupsUpdate
+  onGroupsUpdate,
+  config
 }: EndpointGroupTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -468,6 +473,7 @@ export function EndpointGroupTable({
         group={viewExample}
         open={!!viewExample}
         onOpenChange={(open) => !open && setViewExample(null)}
+        config={config}
       />
     </div>
   );

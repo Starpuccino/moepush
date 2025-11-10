@@ -20,10 +20,15 @@ import { EndpointGroupTable } from '@/components/endpoint-group-table';
 
 export function EndpointsTabs({
   initialEndpoints,
-  channels
+  channels,
+  config
 }: {
   initialEndpoints: Endpoint[];
   channels: Channel[];
+  config: {
+    pushTimeout: number;
+    callbackTimeout: number;
+  };
 }) {
   const [endpoints, setEndpoints] = useState<Endpoint[]>(initialEndpoints);
   const [groups, setGroups] = useState<EndpointGroupWithEndpoints[]>([]);
@@ -103,6 +108,7 @@ export function EndpointsTabs({
                 onEndpointsUpdate={loadEndpoints}
                 channels={channels}
                 onGroupCreated={switchToGroupsTab}
+                config={config}
               />
             )}
           </CardContent>
@@ -124,6 +130,7 @@ export function EndpointsTabs({
                 groups={groups}
                 availableEndpoints={endpoints}
                 onGroupsUpdate={loadGroups}
+                config={config}
               />
             )}
           </CardContent>

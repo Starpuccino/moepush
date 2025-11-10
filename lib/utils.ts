@@ -2,6 +2,7 @@ import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { customAlphabet } from 'nanoid';
 import dayjs from 'dayjs';
+import config from './constants/config';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -9,7 +10,7 @@ export function cn(...inputs: ClassValue[]) {
 
 export async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
-  const salt = process.env.AUTH_SECRET || '';
+  const salt = config.AUTH_SECRET || '';
   const data = encoder.encode(password + salt);
   const hash = await crypto.subtle.digest('SHA-256', data);
   return btoa(String.fromCharCode(...new Uint8Array(hash)));

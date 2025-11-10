@@ -1,14 +1,58 @@
-/** 默认超时时间（毫秒） */
-export const DEFAULT_PUSH_TIMEOUT = 10000;
+type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-/** 默认推送组并发数 */
-export const DEFAULT_PUSH_GROUP_CONCURRENCY = 4;
+const config = {
+  /** 推送超时时间（毫秒） */
+  get PUSH_TIMEOUT(): number {
+    return parseInt(process.env.PUSH_TIMEOUT || '10000', 10);
+  },
 
-/** 默认回调超时时间（毫秒） */
-export const DEFAULT_CALLBACK_TIMEOUT = 10000;
+  /** 推送组并发数 */
+  get PUSH_GROUP_CONCURRENCY(): number {
+    return parseInt(process.env.PUSH_GROUP_CONCURRENCY || '4', 10);
+  },
 
-/** 默认日志级别 */
-export const DEFAULT_LOG_LEVEL = 'debug';
+  /** 回调超时时间（毫秒） */
+  get CALLBACK_TIMEOUT(): number {
+    return parseInt(process.env.CALLBACK_TIMEOUT || '10000', 10);
+  },
 
-/** 默认日志存储目录 */
-export const DEFAULT_LOG_DIR = './logs';
+  /** 日志级别 */
+  get LOG_LEVEL(): LogLevel {
+    return (process.env.LOG_LEVEL || 'debug').toLowerCase() as LogLevel;
+  },
+
+  /** 日志存储目录 */
+  get LOG_DIR(): string {
+    return process.env.LOG_DIR || './logs';
+  },
+
+  /** 认证密钥 */
+  get AUTH_SECRET(): string {
+    return process.env.AUTH_SECRET || '';
+  },
+
+  /** GitHub OAuth 客户端 ID */
+  get AUTH_GITHUB_ID(): string {
+    return process.env.AUTH_GITHUB_ID || '';
+  },
+
+  /** GitHub OAuth 客户端密钥 */
+  get AUTH_GITHUB_SECRET(): string {
+    return process.env.AUTH_GITHUB_SECRET || '';
+  },
+
+  /** 是否禁用注册 */
+  get DISABLE_REGISTER(): boolean {
+    return process.env.DISABLE_REGISTER === 'true';
+  },
+
+  /** Node 环境 */
+  get NODE_ENV(): string {
+    return process.env.NODE_ENV || 'development';
+  }
+};
+
+export default config;
+
+// 导出类型以便使用
+export type { LogLevel };

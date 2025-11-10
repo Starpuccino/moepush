@@ -70,13 +70,18 @@ interface EndpointTableProps {
   channels: Channel[];
   onEndpointsUpdate: () => void;
   onGroupCreated: () => void;
+  config: {
+    pushTimeout: number;
+    callbackTimeout: number;
+  };
 }
 
 export function EndpointTable({
   endpoints,
   channels,
   onEndpointsUpdate,
-  onGroupCreated
+  onGroupCreated,
+  config
 }: EndpointTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
@@ -507,6 +512,7 @@ export function EndpointTable({
         endpoint={viewExample}
         open={!!viewExample}
         onOpenChange={(open) => !open && setViewExample(null)}
+        config={config}
       />
 
       <CreateEndpointGroupDialog

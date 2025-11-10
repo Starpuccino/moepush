@@ -5,6 +5,7 @@ import { channels } from '@/lib/db/schema/channels';
 import { eq } from 'drizzle-orm';
 import { Channel } from '@/lib/channels';
 import { EndpointsTabs } from '@/components/endpoints-tabs';
+import config from '@/lib/constants/config';
 
 export const runtime = 'edge';
 
@@ -32,6 +33,12 @@ export default async function EndpointsPage() {
     getChannels(session!.user!.id!)
   ]);
 
+  // 在服务端读取配置
+  const configValues = {
+    pushTimeout: config.PUSH_TIMEOUT,
+    callbackTimeout: config.CALLBACK_TIMEOUT
+  };
+
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -44,6 +51,7 @@ export default async function EndpointsPage() {
       <EndpointsTabs
         initialEndpoints={endpointList}
         channels={channelList as Channel[]}
+        config={configValues}
       />
     </div>
   );

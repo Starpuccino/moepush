@@ -4,11 +4,12 @@ import { users } from '@/lib/db/schema';
 import { authSchema } from '@/lib/validation';
 import { eq } from 'drizzle-orm';
 import { hashPassword } from '@/lib/utils';
+import config from '@/lib/constants/config';
 
 export const runtime = 'edge';
 
 export async function POST(request: Request) {
-  if (process.env.DISABLE_REGISTER === 'true') {
+  if (config.DISABLE_REGISTER) {
     return NextResponse.json({ message: '注册已关闭' }, { status: 403 });
   }
   try {
