@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   createPushGroupResponse,
   createPushResponse
-} from '@/lib/types/push-response';
+} from '@/types/push-response';
 
 describe('push response helpers', () => {
   it('creates push response with correct structure', () => {

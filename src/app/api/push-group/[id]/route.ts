@@ -9,7 +9,7 @@ import { ENDPOINT_STATUS } from '@/lib/constants/endpoints';
 import {
   createPushGroupResponse,
   PushGroupDetail
-} from '@/lib/types/push-response';
+} from '@/types/push-response';
 import { pushLogger } from '@/lib/utils/push-logger';
 import { ConcurrencyLimiter } from '@/lib/utils/concurrency-limiter';
 import { sendCallbackAsync } from '@/lib/services/push-callback';

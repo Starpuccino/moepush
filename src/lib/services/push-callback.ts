@@ -3,7 +3,7 @@
  * 发送异步推送的回调请求
  */
 
-import { PushResponseType } from '@/lib/types/push-response';
+import { PushResponseType } from '@/types/push-response';
 import { pushLogger } from '@/lib/utils/push-logger';
 
 /**

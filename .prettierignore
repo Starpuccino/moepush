@@ -14,4 +14,4 @@ yarn.lock
 .turbo
 drizzle
 .wrangler
-components/ui
+src/components/ui

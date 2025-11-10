@@ -4,7 +4,7 @@ import { endpoints } from '@/lib/db/schema/endpoints';
 import { eq } from 'drizzle-orm';
 import { safeInterpolate } from '@/lib/template';
 import { sendChannelMessage } from '@/lib/channels';
-import { createPushResponse } from '@/lib/types/push-response';
+import { createPushResponse } from '@/types/push-response';
 import { pushLogger } from '@/lib/utils/push-logger';
 import { sendCallbackAsync } from '@/lib/services/push-callback';
 import { generateId } from '@/lib/utils';
