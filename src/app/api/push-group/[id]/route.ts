@@ -4,6 +4,7 @@ import {
   endpointGroups,
   endpointToGroup
 } from '@/lib/db/schema/endpoint-groups';
+import type { Endpoint } from '@/lib/db/schema/endpoints';
 import { eq } from 'drizzle-orm';
 import { ENDPOINT_STATUS } from '@/lib/constants/endpoints';
 import {
@@ -189,7 +190,7 @@ export async function POST(
       }
     });
 
-    const allEndpoints = relations.map((r: any) => r.endpoint);
+    const allEndpoints = relations.map((r: { endpoint: Endpoint }) => r.endpoint);
 
     if (allEndpoints.length === 0) {
       pushLogger.warn(traceId, 'GroupPushRequest', 'Group has no endpoints', {
@@ -209,7 +210,7 @@ export async function POST(
 
     // 预过滤：仅保留活跃端点
     const activeEndpoints = allEndpoints.filter(
-      (ep: any) => ep.status === 'active'
+      (ep: Endpoint) => ep.status === 'active'
     );
     const skippedCount = allEndpoints.length - activeEndpoints.length;
 
@@ -237,7 +238,7 @@ export async function POST(
           const details: PushGroupDetail[] = [];
 
           const settledResults = await limiter.runAll(
-            activeEndpoints.map((endpoint: any) => async () => {
+            activeEndpoints.map((endpoint: Endpoint) => async () => {
               const result = await callPushEndpoint(
                 endpoint.id,
                 endpoint.name,
@@ -341,7 +342,7 @@ export async function POST(
     const details: PushGroupDetail[] = [];
 
     const settledResults = await limiter.runAll(
-      activeEndpoints.map((endpoint: any) => async () => {
+      activeEndpoints.map((endpoint: Endpoint) => async () => {
         const result = await callPushEndpoint(
           endpoint.id,
           endpoint.name,

@@ -1,10 +1,11 @@
 import { Endpoint, NewEndpoint } from '@/lib/db/schema/endpoints';
+import { PushResponse } from '@/types/push-response';
 import { generateExampleBody } from '../generator';
 import { EndpointStatus, ENDPOINT_STATUS } from '@/lib/constants/endpoints';
 
 const API_URL = '/api/endpoints';
 
-export async function createEndpoint(data: NewEndpoint) {
+export async function createEndpoint(data: NewEndpoint): Promise<Endpoint> {
   const res = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -18,7 +19,10 @@ export async function createEndpoint(data: NewEndpoint) {
   return res.json() as Promise<Endpoint>;
 }
 
-export async function updateEndpoint(id: string, data: Partial<NewEndpoint>) {
+export async function updateEndpoint(
+  id: string,
+  data: Partial<NewEndpoint>
+): Promise<Endpoint> {
   const res = await fetch(`${API_URL}/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -32,7 +36,7 @@ export async function updateEndpoint(id: string, data: Partial<NewEndpoint>) {
   return res.json() as Promise<Endpoint>;
 }
 
-export async function deleteEndpoint(id: string) {
+export async function deleteEndpoint(id: string): Promise<void> {
   const res = await fetch(`${API_URL}/${id}`, {
     method: 'DELETE'
   });
@@ -42,7 +46,7 @@ export async function deleteEndpoint(id: string) {
   }
 }
 
-export async function toggleEndpointStatus(id: string) {
+export async function toggleEndpointStatus(id: string): Promise<Endpoint> {
   const res = await fetch(`${API_URL}/${id}/toggle`, {
     method: 'POST'
   });
@@ -54,7 +58,11 @@ export async function toggleEndpointStatus(id: string) {
   return res.json() as Promise<Endpoint>;
 }
 
-export async function testEndpoint(id: string, rule: string, customData?: any) {
+export async function testEndpoint(
+  id: string,
+  rule: string,
+  customData?: string | Record<string, unknown>
+): Promise<PushResponse> {
   const exampleBody = customData || generateExampleBody(rule);
   const res = await fetch(`/api/push/${id}`, {
     method: 'POST',
@@ -67,23 +75,23 @@ export async function testEndpoint(id: string, rule: string, customData?: any) {
     throw new Error(error.message || '测试失败');
   }
 
-  return res.json();
+  return res.json() as Promise<PushResponse>;
 }
 
-export async function getEndpoints() {
+export async function getEndpoints(): Promise<Endpoint[]> {
   const response = await fetch(API_URL);
   if (!response.ok) {
     const error = (await response.json()) as { error: string };
     throw new Error(error.error || '获取接口失败');
   }
-  return response.json();
+  return response.json() as Promise<Endpoint[]>;
 }
 
 export async function copyEndpoint(
   id: string,
   name: string,
   status: EndpointStatus = ENDPOINT_STATUS.INACTIVE
-) {
+): Promise<Endpoint> {
   const res = await fetch(`${API_URL}/${id}/copy`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

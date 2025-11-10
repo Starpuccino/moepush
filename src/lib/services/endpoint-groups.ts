@@ -1,4 +1,6 @@
 import { EndpointGroupWithEndpoints } from '@/types/endpoint-group';
+import { Endpoint } from '@/lib/db/schema/endpoints';
+import { PushGroupResponse } from '@/types/push-response';
 import { generateExampleBody } from '@/lib/generator';
 import { EndpointStatus, ENDPOINT_STATUS } from '@/lib/constants/endpoints';
 
@@ -12,7 +14,7 @@ interface EndpointGroupResponse {
   createdAt: string;
   updatedAt: string;
   endpointIds: string[];
-  endpoints: any[];
+  endpoints: Endpoint[];
 }
 
 interface ToggleEndpointGroupResponse extends EndpointGroupResponse {
@@ -133,8 +135,8 @@ export async function toggleEndpointGroupStatus(
 
 export async function testEndpointGroup(
   group: EndpointGroupWithEndpoints,
-  customData?: any
-): Promise<any> {
+  customData?: string | Record<string, unknown>
+): Promise<PushGroupResponse> {
   // 使用所有接口中的规则生成测试数据
   const allRules = group.endpoints.flatMap((e) => (e.rule ? [e.rule] : []));
   const exampleBody =
@@ -154,7 +156,7 @@ export async function testEndpointGroup(
     throw new Error(error.error || '测试推送失败');
   }
 
-  return response.json();
+  return response.json() as Promise<PushGroupResponse>;
 }
 
 export async function copyEndpointGroup(

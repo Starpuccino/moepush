@@ -192,7 +192,7 @@ export function EndpointTable({
   };
 
   async function handleTest(testData: any) {
-    if (!endpointToTest) return;
+    if (!endpointToTest) return null;
 
     setIsTesting(endpointToTest.id);
     try {

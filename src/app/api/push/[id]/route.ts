@@ -1,9 +1,11 @@
 import { NextRequest } from 'next/server';
 import { getDb } from '@/lib/db';
 import { endpoints } from '@/lib/db/schema/endpoints';
+import type { Endpoint } from '@/lib/db/schema/endpoints';
+import type { Channel } from '@/lib/db/schema/channels';
 import { eq } from 'drizzle-orm';
 import { safeInterpolate } from '@/lib/template';
-import { sendChannelMessage } from '@/lib/channels';
+import { sendChannelMessage, type ChannelType } from '@/lib/channels';
 import { createPushResponse } from '@/types/push-response';
 import { pushLogger } from '@/lib/utils/push-logger';
 import { sendCallbackAsync } from '@/lib/services/push-callback';
@@ -18,15 +20,20 @@ import config from '@/lib/constants/config';
 
 export const runtime = 'edge';
 
+interface PushResult {
+  success: boolean;
+  error?: string;
+}
+
 /**
  * 执行推送（带超时控制）
  */
 async function executePush(
-  endpoint: any,
+  endpoint: Endpoint & { channel: Channel },
   body: any,
   timeout: number,
   traceId: string
-): Promise<{ success: boolean; error?: string }> {
+): Promise<PushResult> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
@@ -47,14 +54,18 @@ async function executePush(
       timeout
     });
 
-    await sendChannelMessage(endpoint.channel.type as any, messageObj, {
-      webhook: endpoint.channel.webhook,
-      secret: endpoint.channel.secret,
-      corpId: endpoint.channel.corpId,
-      agentId: endpoint.channel.agentId,
-      botToken: endpoint.channel.botToken,
-      chatId: endpoint.channel.chatId
-    });
+    await sendChannelMessage(
+      endpoint.channel.type as ChannelType,
+      messageObj,
+      {
+        webhook: endpoint.channel.webhook,
+        secret: endpoint.channel.secret,
+        corpId: endpoint.channel.corpId,
+        agentId: endpoint.channel.agentId,
+        botToken: endpoint.channel.botToken,
+        chatId: endpoint.channel.chatId
+      }
+    );
 
     pushLogger.info(traceId, 'Push', 'Push executed successfully', {
       endpointId: endpoint.id,

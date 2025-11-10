@@ -82,15 +82,14 @@ export const insertChannelSchema = createInsertSchema(channels)
   )
   .refine(
     (data) => {
-      if (
-        ![
-          CHANNEL_TYPES.WECOM_APP,
-          CHANNEL_TYPES.TELEGRAM,
-          CHANNEL_TYPES.FEISHU,
-          CHANNEL_TYPES.BARK,
-          CHANNEL_TYPES.WEBHOOK
-        ].includes(data.type as any)
-      ) {
+      const noWebhookTypes = [
+        CHANNEL_TYPES.WECOM_APP,
+        CHANNEL_TYPES.TELEGRAM,
+        CHANNEL_TYPES.FEISHU,
+        CHANNEL_TYPES.BARK,
+        CHANNEL_TYPES.WEBHOOK
+      ];
+      if (!noWebhookTypes.includes(data.type as any)) {
         if (!data.webhook) return false;
         try {
           new URL(data.webhook);

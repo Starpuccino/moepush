@@ -33,7 +33,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { insertChannelSchema } from '@/lib/db/schema/channels';
 import type { ChannelFormData } from '@/lib/db/schema/channels';
 import { useToast } from '@/components/ui/use-toast';
-import { Channel, CHANNEL_LABELS, CHANNEL_TYPES } from '@/lib/channels';
+import { Channel, CHANNEL_LABELS, CHANNEL_TYPES, type ChannelType } from '@/lib/channels';
 import { useRouter } from 'next/navigation';
 import { createChannel, updateChannel } from '@/lib/services/channels';
 import { ChannelFormFields } from './channel-form';
@@ -54,7 +54,7 @@ export function ChannelDialog({
   const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();
-  const [selectedType, setSelectedType] = useState(channel?.type);
+  const [selectedType, setSelectedType] = useState<ChannelType | undefined>(channel?.type);
   const router = useRouter();
 
   // 如果提供了 controlledOpen，则使用受控模式
@@ -171,7 +171,7 @@ export function ChannelDialog({
                   <Select
                     onValueChange={(value) => {
                       field.onChange(value as keyof typeof CHANNEL_TYPES);
-                      setSelectedType(value as any);
+                      setSelectedType(value as ChannelType);
                     }}
                     value={selectedType}
                     disabled={mode === 'edit'}

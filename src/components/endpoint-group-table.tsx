@@ -174,7 +174,7 @@ export function EndpointGroupTable({
   };
 
   const handleTest = async (testData: any) => {
-    if (!groupToTest) return;
+    if (!groupToTest) return null;
 
     if (groupToTest.endpoints.length === 0) {
       toast({
@@ -197,10 +197,11 @@ export function EndpointGroupTable({
     setIsTesting(groupToTest.id);
     try {
       const result = await testEndpointGroup(groupToTest, testData);
+      const { successCount, failedCount } = result.data;
       toast({
         title: '测试结果',
-        description: `成功: ${result.successCount}, 失败: ${result.failedCount}`,
-        variant: result.failedCount > 0 ? 'destructive' : 'default'
+        description: `成功: ${successCount}, 失败: ${failedCount}`,
+        variant: failedCount > 0 ? 'destructive' : 'default'
       });
       return result;
     } catch (error) {
