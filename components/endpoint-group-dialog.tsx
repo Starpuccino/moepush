@@ -24,7 +24,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useToast } from '@/components/ui/use-toast';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import {
   createEndpointGroup,
   updateEndpointGroup
@@ -47,6 +46,8 @@ interface EndpointGroupDialogProps {
   availableEndpoints: Endpoint[];
   icon?: React.ReactNode;
   onSuccess?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function EndpointGroupDialog({
@@ -54,12 +55,18 @@ export function EndpointGroupDialog({
   group,
   availableEndpoints,
   icon,
-  onSuccess
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: EndpointGroupDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();
   const router = useRouter();
+
+  // 如果提供了 controlledOpen，则使用受控模式
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
 
   const form = useForm<EndpointGroupFormValues>({
     resolver: zodResolver(endpointGroupSchema),
@@ -125,19 +132,14 @@ export function EndpointGroupDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {mode === 'edit' ? (
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            {icon}
-            编辑
-          </DropdownMenuItem>
-        ) : (
+      {mode === 'create' && (
+        <DialogTrigger asChild>
           <Button size="sm" className="gap-2">
             <Plus className="h-4 w-4" />
             添加新的接口组
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
           <DialogTitle>

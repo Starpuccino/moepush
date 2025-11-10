@@ -16,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Loader2 } from 'lucide-react';
+import { MoreHorizontal, Loader2, Pencil, Trash2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { ChannelDialog } from '@/components/channel-dialog';
 import { Channel, CHANNEL_LABELS } from '@/lib/channels';
@@ -46,6 +46,8 @@ export function ChannelTable({ channels }: ChannelTableProps) {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [channelToDelete, setChannelToDelete] = useState<Channel | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [channelToEdit, setChannelToEdit] = useState<Channel | null>(null);
   const { toast } = useToast();
   const router = useRouter();
 
@@ -151,7 +153,15 @@ export function ChannelTable({ channels }: ChannelTableProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <ChannelDialog mode="edit" channel={channel} />
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setChannelToEdit(channel);
+                            setEditDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          编辑
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           className="text-red-600"
                           onClick={() => {
@@ -159,6 +169,7 @@ export function ChannelTable({ channels }: ChannelTableProps) {
                             setDeleteDialogOpen(true);
                           }}
                         >
+                          <Trash2 className="h-4 w-4 mr-2" />
                           删除
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -188,6 +199,13 @@ export function ChannelTable({ channels }: ChannelTableProps) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <ChannelDialog
+        mode="edit"
+        channel={channelToEdit || undefined}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+      />
     </div>
   );
 }

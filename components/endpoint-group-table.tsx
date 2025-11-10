@@ -92,6 +92,9 @@ export function EndpointGroupTable({
   const [groupToTest, setGroupToTest] =
     useState<EndpointGroupWithEndpoints | null>(null);
   const [testInitialContent, setTestInitialContent] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [groupToEdit, setGroupToEdit] =
+    useState<EndpointGroupWithEndpoints | null>(null);
   const { toast } = useToast();
 
   const filteredGroups = groups.filter((group) => {
@@ -329,13 +332,15 @@ export function EndpointGroupTable({
                           <Send className="mr-2 h-4 w-4" />
                           测试推送
                         </DropdownMenuItem>
-                        <EndpointGroupDialog
-                          mode="edit"
-                          group={group}
-                          availableEndpoints={availableEndpoints}
-                          onSuccess={onGroupsUpdate}
-                          icon={<Pencil className="h-4 w-4 mr-2" />}
-                        />
+                        <DropdownMenuItem
+                          onClick={() => {
+                            setGroupToEdit(group);
+                            setEditDialogOpen(true);
+                          }}
+                        >
+                          <Pencil className="h-4 w-4 mr-2" />
+                          编辑
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                           onClick={() => {
                             setGroupToCopy(group);
@@ -474,6 +479,15 @@ export function EndpointGroupTable({
         open={!!viewExample}
         onOpenChange={(open) => !open && setViewExample(null)}
         config={config}
+      />
+
+      <EndpointGroupDialog
+        mode="edit"
+        group={groupToEdit || undefined}
+        availableEndpoints={availableEndpoints}
+        onSuccess={onGroupsUpdate}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
       />
     </div>
   );

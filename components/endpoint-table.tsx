@@ -106,6 +106,8 @@ export function EndpointTable({
   const [testDialogOpen, setTestDialogOpen] = useState(false);
   const [endpointToTest, setEndpointToTest] = useState<Endpoint | null>(null);
   const [testInitialContent, setTestInitialContent] = useState('');
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [endpointToEdit, setEndpointToEdit] = useState<Endpoint | null>(null);
 
   const filteredEndpoints =
     endpoints?.filter((endpoint) => {
@@ -376,13 +378,15 @@ export function EndpointTable({
                             <Zap className="mr-2 h-4 w-4" />
                             测试推送
                           </DropdownMenuItem>
-                          <EndpointDialog
-                            mode="edit"
-                            endpoint={endpoint}
-                            channels={channels}
-                            onSuccess={onEndpointsUpdate}
-                            icon={<Pencil className="h-4 w-4 mr-2" />}
-                          />
+                          <DropdownMenuItem
+                            onClick={() => {
+                              setEndpointToEdit(endpoint);
+                              setEditDialogOpen(true);
+                            }}
+                          >
+                            <Pencil className="h-4 w-4 mr-2" />
+                            编辑
+                          </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => {
                               setEndpointToCopy(endpoint);
@@ -523,6 +527,15 @@ export function EndpointTable({
           setSelectedEndpoints([]);
           onGroupCreated();
         }}
+      />
+
+      <EndpointDialog
+        mode="edit"
+        endpoint={endpointToEdit || undefined}
+        channels={channels}
+        onSuccess={onEndpointsUpdate}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
       />
     </div>
   );

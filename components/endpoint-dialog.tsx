@@ -33,7 +33,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { insertEndpointSchema } from '@/lib/db/schema/endpoints';
 import { Endpoint, NewEndpoint } from '@/lib/db/schema/endpoints';
 import { useToast } from '@/components/ui/use-toast';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Channel, ChannelType } from '@/lib/channels';
 import { CHANNEL_TEMPLATES } from '@/lib/channels';
 import { TemplateFields } from '@/components/template-fields';
@@ -46,6 +45,8 @@ interface EndpointDialogProps {
   channels: Channel[];
   icon?: React.ReactNode;
   onSuccess?: () => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 const getInitialChannelType = (channels: Channel[], endpoint?: Endpoint) => {
@@ -67,9 +68,11 @@ export function EndpointDialog({
   endpoint,
   channels,
   icon,
-  onSuccess
+  onSuccess,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: EndpointDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const [selectedChannelType, setSelectedChannelType] = useState<
     ChannelType | undefined
@@ -79,6 +82,10 @@ export function EndpointDialog({
   >(getInitialTemplateType(endpoint));
   const { toast } = useToast();
   const router = useRouter();
+
+  // 如果提供了 controlledOpen，则使用受控模式
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
 
   const form = useForm<NewEndpoint>({
     resolver: zodResolver(insertEndpointSchema),
@@ -120,19 +127,14 @@ export function EndpointDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {mode === 'edit' ? (
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            {icon}
-            编辑
-          </DropdownMenuItem>
-        ) : (
+      {mode === 'create' && (
+        <DialogTrigger asChild>
           <Button size="sm" className="gap-2">
             <Plus className="h-4 w-4" />
             添加新的接口
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[640px]">
         <DialogHeader>
           <DialogTitle>

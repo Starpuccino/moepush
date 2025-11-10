@@ -34,7 +34,6 @@ import { insertChannelSchema } from '@/lib/db/schema/channels';
 import type { ChannelFormData } from '@/lib/db/schema/channels';
 import { useToast } from '@/components/ui/use-toast';
 import { Channel, CHANNEL_LABELS, CHANNEL_TYPES } from '@/lib/channels';
-import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 import { createChannel, updateChannel } from '@/lib/services/channels';
 import { ChannelFormFields } from './channel-form';
@@ -42,17 +41,25 @@ import { ChannelFormFields } from './channel-form';
 interface ChannelDialogProps {
   mode?: 'create' | 'edit';
   channel?: Channel;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function ChannelDialog({
   mode = 'create',
-  channel
+  channel,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange
 }: ChannelDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
   const { toast } = useToast();
   const [selectedType, setSelectedType] = useState(channel?.type);
   const router = useRouter();
+
+  // 如果提供了 controlledOpen，则使用受控模式
+  const open = controlledOpen !== undefined ? controlledOpen : internalOpen;
+  const setOpen = controlledOnOpenChange || setInternalOpen;
 
   const form = useForm<ChannelFormData>({
     resolver: zodResolver(insertChannelSchema),
@@ -95,18 +102,14 @@ export function ChannelDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {mode === 'edit' ? (
-          <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-            编辑
-          </DropdownMenuItem>
-        ) : (
+      {mode === 'create' && (
+        <DialogTrigger asChild>
           <Button size="sm" className="gap-2">
             <Plus className="h-4 w-4" />
             添加新的渠道
           </Button>
-        )}
-      </DialogTrigger>
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>
