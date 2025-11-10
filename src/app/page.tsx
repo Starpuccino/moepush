@@ -178,7 +178,7 @@ export default async function Home() {
               <a
                 href="https://github.com/beilunyang"
                 target="_blank"
-                rel="noreferrer"
+                rel="noopener noreferrer"
                 className="font-medium hover:text-blue-500 transition-colors"
               >
                 BeilunYang
